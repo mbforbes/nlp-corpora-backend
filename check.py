@@ -27,13 +27,14 @@ from mypy_extensions import TypedDict
 #
 
 # information we want from all results
-class DirResult(TypedDict):
-    basename: str
-    description: Optional[str]
-    size: str
-    dir_clean: bool
-    readme_exists: bool
-    readme_complete: bool
+# class DirResult(TypedDict):
+#     basename: str
+#     description: Optional[str]
+#     size: str
+#     dir_clean: bool
+#     readme_exists: bool
+#     readme_complete: bool
+DirResult = Any
 
 
 #
