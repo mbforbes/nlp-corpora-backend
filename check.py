@@ -16,7 +16,7 @@ import code  # TODO(mbforbes): Remove (for debugging).
 import glob
 import os
 import subprocess
-from typing import List, Optional
+from typing import Any, List, Optional
 
 # 3rd party
 from mypy_extensions import TypedDict
@@ -27,13 +27,16 @@ from mypy_extensions import TypedDict
 #
 
 # information we want from all results
-class DirResult(TypedDict):
-    basename: str
-    description: Optional[str]
-    size: str
-    dir_clean: bool
-    readme_exists: bool
-    readme_complete: bool
+# NOTE: python 3.6 only. dept. running python 3.4. may be able to upgrade but
+# removing this feature for now.
+# class DirResult(TypedDict):
+#     basename: str
+#     description: Optional[str]
+#     size: str
+#     dir_clean: bool
+#     readme_exists: bool
+#     readme_complete: bool
+DirResult = Any
 
 
 #
