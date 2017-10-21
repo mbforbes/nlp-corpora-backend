@@ -86,6 +86,9 @@ software.)
 Current feature worklist:
 
 - [ ] Resolve python3.4/3.6 usage on dept. server and settle on type usage
+- [ ] Copy corpus directories' `README.md`s into here (under corpus names) and
+  link on status table so that all docs can be browsed from this master
+  README.md
 - [ ] Badge showing how recently checker job was run
 - [ ] Automatically discover username to blame for directory failing any checks
 - [ ] Email blamed users (and admin) at fixed interval
