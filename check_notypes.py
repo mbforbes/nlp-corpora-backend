@@ -16,24 +16,6 @@ import code  # TODO(mbforbes): Remove (for debugging).
 import glob
 import os
 import subprocess
-from typing import Any, List, Optional
-
-# 3rd party
-from mypy_extensions import TypedDict
-
-
-#
-# types
-#
-
-# information we want from all results
-class DirResult(TypedDict):
-    basename: str
-    description: Optional[str]
-    size: str
-    dir_clean: bool
-    readme_exists: bool
-    readme_complete: bool
 
 
 #
@@ -65,14 +47,14 @@ FOOTER_FN = 'footer.md'
 # functions
 #
 
-def get_size(path: str) -> str:
+def get_size(path):
     """
     Thanks to https://stackoverflow.com/a/25574638
     """
     return subprocess.check_output(['du','-sh', path]).split()[0].decode('utf-8')
 
 
-def get_dirs(base_dir: str) -> List[str]:
+def get_dirs(base_dir):
     # get all subdirectories
     globs = glob.glob(os.path.join(base_dir, '*'))
     paths = []
@@ -82,7 +64,7 @@ def get_dirs(base_dir: str) -> List[str]:
     return paths
 
 
-def check_dir(path: str) -> DirResult:
+def check_dir(path):
     """
     For a corpus directory (`path`), checks its properties to ensure they
     conform to the nlp-corpora guidelines.
@@ -159,7 +141,7 @@ def check_dir(path: str) -> DirResult:
     return res
 
 
-def debug_print_results(results: List[DirResult]) -> None:
+def debug_print_results(results) -> None:
     fmt = '{} \t {} \t {} \t {} \t {} \t {}'
     print(fmt.format(
         'dirname', 'desc', 'size', 'dir clean', 'README exists',
@@ -170,11 +152,11 @@ def debug_print_results(results: List[DirResult]) -> None:
             res['readme_exists'], res['readme_complete']))
 
 
-def fun_bool(boring: bool) -> str:
+def fun_bool(boring):
     return '✔' if boring else '✗'
 
 
-def generate_results_markdown(results: List[DirResult]) -> str:
+def generate_results_markdown(results):
     fmt = '{} | {} | {} | {} | {} | {}'
     header = fmt.format('dirname', 'desc', 'size', 'dir clean',
         'README exists', 'README complete')
@@ -190,14 +172,14 @@ def generate_results_markdown(results: List[DirResult]) -> str:
     return '\n'.join([header, separator] + rows)
 
 
-def check(base_dir: str) -> str:
+def check(base_dir):
     paths = get_dirs(base_dir)
     results = [check_dir(p) for p in paths]
     # debug_print_results(results)
     return generate_results_markdown(results)
 
 
-def main() -> None:
+def main():
     # cmd line args
     parser = argparse.ArgumentParser()
     parser.add_argument(
