@@ -85,6 +85,7 @@ software.)
 
 Current feature worklist:
 
+- [ ] Resolve python3.4/3.6 usage on dept. server and settle on type usage
 - [ ] Badge showing how recently checker job was run
 - [ ] Automatically discover username to blame for directory failing any checks
 - [ ] Email blamed users (and admin) at fixed interval
