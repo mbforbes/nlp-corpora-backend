@@ -1,18 +1,3 @@
-# nlp-corpora
-
-This document shows the live status of the `/projects/nlp-corpora/` corpus
-repository.
-
-## Status
-
-dirname | desc | size | dir clean | README exists | README complete
---- | --- | --- | --- | --- | ---
-crapfile.crap | None | 0B | ✗ | ✗ | ✗
-empty-prj | None | 0B | ✔ | ✗ | ✗
-good-bare-prj | None | 0B | ✔ | ✔ | ✔
-good-detailed-prj | This is a sample description. | 4.0K | ✔ | ✔ | ✔
-prj-w-crap | None | 0B | ✗ | ✔ | ✔
-prj-wo-readme | None | 0B | ✔ | ✗ | ✗
 
 ### Legend
 
@@ -95,4 +80,3 @@ version of a script). Also acceptable is an English description. For example,
 if it was tokenized, which tokenizer was used, and which version of that
 software.)
 ```
-

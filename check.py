@@ -2,6 +2,8 @@
 Checker script to sanity check /projects/nlp-corpora/ directory.
 
 python3.6
+
+Writes to stdout.
 """
 
 #
@@ -55,6 +57,12 @@ CLEAN_DIR_WHITELIST = [
     'processed',
     'README.md',
 ]
+
+# file to use as header for results
+HEADER_FN = 'header.md'
+
+# file to use as footer for results
+FOOTER_FN = 'footer.md'
 
 
 #
@@ -151,11 +159,7 @@ def check_dir(path: str) -> DirResult:
     return res
 
 
-def main():
-    paths = get_dirs(BASE_DIR)
-    results = [check_dir(p) for p in paths]
-
-    # temp: debug print results:
+def debug_print_results(results: List[DirResult]) -> None:
     fmt = '{} \t {} \t {} \t {} \t {} \t {}'
     print(fmt.format(
         'dirname', 'desc', 'size', 'dir clean', 'README exists',
@@ -164,6 +168,45 @@ def main():
         print(fmt.format(
             res['basename'], res['description'], res['size'], res['dir_clean'],
             res['readme_exists'], res['readme_complete']))
+
+
+def fun_bool(boring: bool) -> str:
+    return '✔' if boring else '✗'
+
+
+def generate_results_markdown(results: List[DirResult]) -> str:
+    fmt = '{} | {} | {} | {} | {} | {}'
+    header = fmt.format('dirname', 'desc', 'size', 'dir clean',
+        'README exists', 'README complete')
+    separator = fmt.format('---', '---', '---', '---', '---', '---')
+    rows = []
+    for res in results:
+        rows.append(fmt.format(
+            res['basename'], res['description'], res['size'],
+            fun_bool(res['dir_clean']),
+            fun_bool(res['readme_exists']),
+            fun_bool(res['readme_complete'])
+        ))
+    return '\n'.join([header, separator] + rows)
+
+
+def check():
+    paths = get_dirs(BASE_DIR)
+    results = [check_dir(p) for p in paths]
+    # debug_print_results(results)
+    return generate_results_markdown(results)
+
+
+def main():
+    with open(HEADER_FN, 'r') as f:
+        header = f.read()
+    status = check()
+    with open(FOOTER_FN, 'r') as f:
+        footer = f.read()
+    res = '\n'.join([header, status, footer])
+
+    # could write to file, just writing to stdout
+    print(res)
 
 
 if __name__ == '__main__':
