@@ -141,7 +141,7 @@ def check_dir(path):
     return res
 
 
-def debug_print_results(results) -> None:
+def debug_print_results(results):
     fmt = '{} \t {} \t {} \t {} \t {} \t {}'
     print(fmt.format(
         'dirname', 'desc', 'size', 'dir clean', 'README exists',
