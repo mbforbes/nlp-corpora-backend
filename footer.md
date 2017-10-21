@@ -1,7 +1,7 @@
 
 ### Legend
 
-key | meaningo
+key | meaning
 --- | ---
 dirname | The name of the top-level corpus directory within `nlp-corpora`
 desc | The description found in the README.md file for the corpus
@@ -80,3 +80,13 @@ version of a script). Also acceptable is an English description. For example,
 if it was tokenized, which tokenizer was used, and which version of that
 software.)
 ```
+
+## Contributing
+
+Current feature worklist:
+
+- [ ] Badge showing how recently checker job was run
+- [ ] Automatically discover username to blame for directory failing any checks
+- [ ] Email blamed users (and admin) at fixed interval
+- [ ] Pie chart showing overall usage breakdown
+- [ ] Email admin if usage gets above threshold (e.g., 90%)

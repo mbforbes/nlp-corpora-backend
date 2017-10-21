@@ -11,6 +11,7 @@ Writes to stdout.
 #
 
 # builtins
+import argparse
 import code  # TODO(mbforbes): Remove (for debugging).
 import glob
 import os
@@ -38,11 +39,6 @@ class DirResult(TypedDict):
 #
 # settings
 #
-
-# This is the top-level directory to check, directly under which all corpus
-# directories will live.
-# TODO: change to /projects/nlp-corpora
-BASE_DIR = '/Users/max/Desktop/nlp-corpora-tester/'
 
 # These are the things allowed to be in the top-level directory that aren't
 # checked.
@@ -90,6 +86,10 @@ def check_dir(path: str) -> DirResult:
     """
     For a corpus directory (`path`), checks its properties to ensure they
     conform to the nlp-corpora guidelines.
+
+    Calling this `path` and not `directory` or something because it may
+    actually end up being a file and not a directory, and we need to handle
+    that case. Also, it's a full path, not just a local directory.
     """
     # define res upfront and mutate as we discover things
     res = {
@@ -190,17 +190,26 @@ def generate_results_markdown(results: List[DirResult]) -> str:
     return '\n'.join([header, separator] + rows)
 
 
-def check():
-    paths = get_dirs(BASE_DIR)
+def check(base_dir: str) -> str:
+    paths = get_dirs(base_dir)
     results = [check_dir(p) for p in paths]
     # debug_print_results(results)
     return generate_results_markdown(results)
 
 
-def main():
+def main() -> None:
+    # cmd line args
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--directory',
+        type=str,
+        default='/projects/nlp-corpora/',
+        help='path to top-level corpus directory (default: "/projects/nlp-corpora/"')
+    args = parser.parse_args()
+
     with open(HEADER_FN, 'r') as f:
         header = f.read()
-    status = check()
+    status = check(args.directory)
     with open(FOOTER_FN, 'r') as f:
         footer = f.read()
     res = '\n'.join([header, status, footer])
