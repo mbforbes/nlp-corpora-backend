@@ -7,12 +7,12 @@ repository.
 
 dirname | desc | size | dir clean | README exists | README complete
 --- | --- | --- | --- | --- | ---
-gutenberg-en | None | 106G | ✔ | ✗ | ✗
-gigaword-en-5 | None | 9.1G | ✔ | ✗ | ✗
-google-syntax-ngrams | None | 318G | ✔ | ✗ | ✗
-google-surface-ngrams | None | 25G | ✔ | ✗ | ✗
-trip-advisor | None | 1.9G | ✗ | ✗ | ✗
-rocstory | None | 188M | ✗ | ✗ | ✗
+gutenberg-en | English Gutenberg. | 106G | ✔ | ✔ | ✗
+gigaword-en-5 | English Gigaword Fifth Edition | 9.1G | ✔ | ✔ | ✔
+google-syntax-ngrams | English Google Syntax Ngrams (v20120701) | 318G | ✔ | ✔ | ✔
+google-surface-ngrams | Google surface ngrams (web 1T 5-gram v1) | 25G | ✔ | ✔ | ✔
+trip-advisor | Crawl of trip-advisor reviews. | 1.9G | ✔ | ✔ | ✗
+rocstory | ROCStories Corpus | 188M | ✔ | ✔ | ✗
 
 ### Legend
 
