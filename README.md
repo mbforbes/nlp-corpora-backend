@@ -7,16 +7,16 @@ repository.
 
 dirname | desc | size | dir clean | README exists | README complete
 --- | --- | --- | --- | --- | ---
-crapfile.crap | None | 0B | ✗ | ✗ | ✗
-empty-prj | None | 0B | ✔ | ✗ | ✗
-good-bare-prj | None | 0B | ✔ | ✔ | ✔
-good-detailed-prj | This is a sample description. | 4.0K | ✔ | ✔ | ✔
-prj-w-crap | None | 0B | ✗ | ✔ | ✔
-prj-wo-readme | None | 0B | ✔ | ✗ | ✗
+gutenberg-en | None | 106G | ✔ | ✗ | ✗
+gigaword-en-5 | None | 9.1G | ✔ | ✗ | ✗
+google-syntax-ngrams | None | 318G | ✔ | ✗ | ✗
+google-surface-ngrams | None | 25G | ✔ | ✗ | ✗
+trip-advisor | None | 1.9G | ✗ | ✗ | ✗
+rocstory | None | 188M | ✗ | ✗ | ✗
 
 ### Legend
 
-key | meaningo
+key | meaning
 --- | ---
 dirname | The name of the top-level corpus directory within `nlp-corpora`
 desc | The description found in the README.md file for the corpus
@@ -95,4 +95,15 @@ version of a script). Also acceptable is an English description. For example,
 if it was tokenized, which tokenizer was used, and which version of that
 software.)
 ```
+
+## Contributing
+
+Current feature worklist:
+
+- [ ] Resolve python3.4/3.6 usage on dept. server and settle on type usage
+- [ ] Badge showing how recently checker job was run
+- [ ] Automatically discover username to blame for directory failing any checks
+- [ ] Email blamed users (and admin) at fixed interval
+- [ ] Pie chart showing overall usage breakdown
+- [ ] Email admin if usage gets above threshold (e.g., 90%)
 
