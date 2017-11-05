@@ -85,7 +85,14 @@ software.)
 
 Current feature worklist:
 
-- [ ] Resolve python3.4/3.6 usage on dept. server and settle on type usage
+- [ ] Resolve python3.4/3.6 usage on some dept. server and settle on type usage
+- [ ] Actually run on (some) dept server w/ cron job (add monthly reminder to
+      ensure actually running)
+- [ ] Owner checks (TODO: should only be admins?)
+- [ ] Permissions checks (TODO: )
+- [ ] Process to request new directories + followup (probably form + linked on
+      README?)
+- [ ] Hashing for `original/`
 - [ ] Copy corpus directories' `README.md`s into here (under corpus names) and
   link on status table so that all docs can be browsed from this master
   README.md
