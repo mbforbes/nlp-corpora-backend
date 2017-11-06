@@ -116,4 +116,12 @@ Current feature worklist:
 - [ ] Email blamed users (and admin) at fixed interval
 - [ ] Pie chart showing overall usage breakdown
 - [ ] Email admin if usage gets above threshold (e.g., 90%)
-
+- [ ] Generate log of passed / failed check html page w/ headers; link failures
+      from status to log
+- [ ] If possible, color code the check / cross marks
+- [ ] Make all existing dirs conform to standards; migrate tmp model dirs
+- [ ] `uwnlp` github org w/ private repos
+- [ ] Migrate this to `uwnlp` github
+- [ ] Have 1-2 others (both in and outside nlp-corpora group) beta test the
+      process to work out snags
+- [ ] Send announcement
