@@ -90,6 +90,9 @@ Current feature worklist:
       ensure actually running)
 - [ ] Owner checks (TODO: should only be admins?)
 - [ ] Permissions checks (TODO: )
+- [ ] `g+s` (i.e., `chmod g+s directory/`) permissions: do we need it on all
+  directories (not just top-level ones), and if so, include in permissions
+  checks.
 - [ ] Process to request new directories + followup (probably form + linked on
       README?)
 - [ ] Hashing for `original/`
