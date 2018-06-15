@@ -104,31 +104,23 @@ software.)
 
 Current feature worklist:
 
-- [ ] Resolve python3.4/3.6 usage on some dept. server and settle on type usage
-- [ ] Actually run on (some) dept server w/ cron job (add monthly reminder to
-      ensure actually running)
-- [ ] Owner checks (TODO: should only be admins?)
-- [ ] Permissions checks (TODO: )
-- [ ] `g+s` (i.e., `chmod g+s directory/`) permissions: do we need it on all
-  directories (not just top-level ones), and if so, include in permissions
-  checks.
-- [ ] Process to request new directories + followup (probably form + linked on
-      README?)
-- [ ] Hashing for `original/`
-- [ ] Copy corpus directories' `README.md`s into here (under corpus names) and
-  link on status table so that all docs can be browsed from this master
-  README.md
+- [ ] Actually run on (some) dept server w/ cron job
 - [ ] Badge showing how recently checker job was run
-- [ ] Automatically discover username to blame for directory failing any checks
-- [ ] Email blamed users (and admin) at fixed interval
-- [ ] Pie chart showing overall usage breakdown
-- [ ] Email admin if usage gets above threshold (e.g., 90%)
-- [ ] Generate log of passed / failed check html page w/ headers; link failures
-      from status to log
+- [ ] Ensure email sends on problems
 - [ ] If possible, color code the check / cross marks
-- [ ] Make all existing dirs conform to standards; migrate tmp model dirs
-- [ ] `uwnlp` github org w/ private repos
+- [ ] Transition to single check/cross in table. Have single report
+  (overwritten at each run) with details.
+- [ ] Expand checks:
+      - [ ] Owner checks (TODO: should only be admins?)
+      - [ ] Permissions checks (TODO: )
+      - [ ] `g+s` (i.e., `chmod g+s directory/`) permissions: do we need it on all
+      directories (not just top-level ones), and if so, include in permissions
+      checks.
+- [ ] Better docs: Copy corpus directories' `README.md`s into here (under
+  corpus names) and link on status table so that all docs can be browsed from
+  this master README.md
+- [ ] Overall usage
+      - [ ] Pie chart showing overall usage breakdown
+      - [ ] Fail overall check (+ email) if usage gets above threshold (e.g., 95%)
 - [ ] Migrate this to `uwnlp` github
-- [ ] Have 1-2 others (both in and outside nlp-corpora group) beta test the
-      process to work out snags
 - [ ] Send announcement
