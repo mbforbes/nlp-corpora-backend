@@ -9,5 +9,5 @@ proposing new additions.
 
 ## Live Status
 
-Below is the live status of the corpora, updated daily
-([legend](https://github.com/mbforbes/nlp-corpora-backend#legend)).
+Below is the live status of the corpora, updated daily ([legend
+below](#table-legend)).
