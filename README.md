@@ -104,7 +104,6 @@ software.)
 
 Current feature worklist:
 
-- [ ] Actually run on (some) dept server w/ cron job
 - [ ] Badge showing how recently checker job was run
 - [ ] Ensure email sends on problems
 - [ ] If possible, color code the check / cross marks
