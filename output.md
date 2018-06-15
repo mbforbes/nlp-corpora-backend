@@ -1,3 +1,24 @@
+# nlp-corpora
+
+UW NLP maintains a repository of corpora for internal UW use on the UW CSE
+department fileserver at `/projects/nlp-corpora/`.
+
+The main purpose of this document is to provide a live, browsable index of all
+of the corpora. Below that are instructions for accessing the corpora and
+proposing new additions.
+
+## Live Status
+
+Below is the live status of the corpora, updated daily.
+
+dirname | desc | size | dir clean | README exists | README complete
+--- | --- | --- | --- | --- | ---
+prj-w-crap | None | 0B | ✗ | ✔ | ✔
+empty-prj | None | 0B | ✔ | ✗ | ✗
+prj-wo-readme | None | 0B | ✔ | ✗ | ✗
+good-bare-prj | None | 0B | ✔ | ✔ | ✔
+crapfile.crap | None | 0B | ✗ | ✗ | ✗
+good-detailed-prj | This is a sample description. | 4.0K | ✔ | ✔ | ✔
 
 ### Legend
 
@@ -63,3 +84,4 @@ Please open a GitHub issue or pull request on this repository.
 ## Maintainers
 
 - [Max Forbes](https://github.com/mbforbes)
+

@@ -1,9 +1,11 @@
-# nlp-corpora
+# nlp-corpora-backend
 
-This document shows the live status of the `/projects/nlp-corpora/` corpus
-repository.
+This repository contains the infrastructure to provide a live status of
+`/projects/nlp-corpora/` by crawling its contents.
 
 ## Status
+
+(old)
 
 dirname | desc | size | dir clean | README exists | README complete
 --- | --- | --- | --- | --- | ---
@@ -13,17 +15,6 @@ google-syntax-ngrams | English Google Syntax Ngrams (v20120701) | 318G | ✔ | �
 google-surface-ngrams | Google surface ngrams (web 1T 5-gram v1) | 25G | ✔ | ✔ | ✔
 trip-advisor | Crawl of trip-advisor reviews. | 1.9G | ✔ | ✔ | ✗
 rocstory | ROCStories Corpus | 188M | ✔ | ✔ | ✗
-
-### Legend
-
-key | meaning
---- | ---
-dirname | The name of the top-level corpus directory within `nlp-corpora`
-desc | The description found in the README.md file for the corpus
-size | The total size of the corpus directory
-dir clean | Whether only the allowed directories and files were found
-README exists | Whether the `README.md` file was found
-README complete | Whether the `README.md` file contained descriptions for all subdirectories in `processed/`
 
 ## Documentation
 

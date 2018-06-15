@@ -1,6 +1,12 @@
 # nlp-corpora
 
-This document shows the live status of the `/projects/nlp-corpora/` corpus
-repository.
+UW NLP maintains a repository of corpora for internal UW use on the UW CSE
+department fileserver at `/projects/nlp-corpora/`.
 
-## Status
+The main purpose of this document is to provide a live, browsable index of all
+of the corpora. Below that are instructions for accessing the corpora and
+proposing new additions.
+
+## Live Status
+
+Below is the live status of the corpora, updated daily.
