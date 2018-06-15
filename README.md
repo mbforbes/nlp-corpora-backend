@@ -16,6 +16,19 @@ google-surface-ngrams | Google surface ngrams (web 1T 5-gram v1) | 25G | ✔ | �
 trip-advisor | Crawl of trip-advisor reviews. | 1.9G | ✔ | ✔ | ✗
 rocstory | ROCStories Corpus | 188M | ✔ | ✔ | ✗
 
+## Legend
+
+Here are what the columns of the live status table mean.
+
+key | meaning
+--- | ---
+dirname | The name of the top-level corpus directory within `nlp-corpora`
+desc | The description found in the README.md file for the corpus
+size | The total size of the corpus directory
+dir clean | Whether only the allowed directories and files were found
+README exists | Whether the `README.md` file was found
+README complete | Whether the `README.md` file contained descriptions for all subdirectories in `processed/`
+
 ## Documentation
 
 Inside the `/projects/nlp-corpora/` directory, there should only be directories

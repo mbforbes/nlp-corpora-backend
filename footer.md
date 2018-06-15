@@ -1,15 +1,4 @@
 
-### Legend
-
-key | meaning
---- | ---
-dirname | The name of the top-level corpus directory within `nlp-corpora`
-desc | The description found in the README.md file for the corpus
-size | The total size of the corpus directory
-dir clean | Whether only the allowed directories and files were found
-README exists | Whether the `README.md` file was found
-README complete | Whether the `README.md` file contained descriptions for all subdirectories in `processed/`
-
 ## Using the corpora
 
 Accessing the nlp-corpora requires UW CSE department server access (e.g., to
@@ -48,17 +37,22 @@ please open a github issue to request access to a restricted corpus.
 
 ## Access outside UW CSE
 
-Accessing the corpora requires a CSE unix account. UW members can receive UW
-CSE guest accounts by having a UW CSE faculty or staff sponsor them at
-https://sponsor.cs.washington.edu/. Despite the name "sponsor," this is
-absolutely _free_. Guest accounts last up to two years and can be renewed
-indefinitely.
+Accessing the corpora requires a UW CSE unix account. UW members can receive a
+free UW CSE guest account by having a UW CSE faculty or staff [sponsor
+them](https://sponsor.cs.washington.edu/). Despite the name "sponsor," this is
+absolutely _free_ for both parties. Guest accounts last up to two years and can
+pbe renewed indefinitely.
 
 Access outside UW is not possible.
 
 ## Bugs / questions / contributions
 
-Please open a GitHub issue or pull request on this repository.
+For any bugs or questions, please open a GitHub issue on this repository (top
+of the webpage).
+
+To help contribute to this project, please check out the [backend
+repository](https://github.com/mbforbes/nlp-corpora-backend) and open issues or
+pull requests there.
 
 ## Maintainers
 
