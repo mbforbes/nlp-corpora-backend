@@ -44,7 +44,7 @@ class DirResult(TypedDict):
 # checked.
 BLACKLIST = [
     'nobackup',
-    'learning_to_write'  # TEMP!! TODO(mbforbes): Remove.
+    '_staging',  # TODO(mbforbes): Special check in here.
 ]
 
 # These are the only things allowed in a top-level (corpus) directory.
