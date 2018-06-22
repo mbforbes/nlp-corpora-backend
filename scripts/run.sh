@@ -20,12 +20,12 @@ cd ~/repos/nlp-corpora-backend/ 1> ~/.cronlog 2>&1
 git pull --rebase origin master 1>> ~/.cronlog 2>&1
 
 # step 2: run crawler
-pyenv activate nlp-corpora
+pyenv activate nlp-corpora 1>> ~/.cronlog 2>&1
 python check.py > ~/repos/nlp-corpora/README.md
 pyenv deactivate
 
 # setp 3: push updated doc
 cd ~/repos/nlp-corpora/
 git add .
-git commit -m "update `date '+%m/%d/%Y %H:%M:%S'`"
+git commit -m "update `date '+%m/%d/%Y %H:%M:%S'`" 1>> ~/.cronlog 2>&1
 git push origin master 1>> ~/.cronlog 2>&1
