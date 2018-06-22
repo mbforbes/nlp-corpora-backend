@@ -9,6 +9,7 @@ Checker script to crawl /projects/nlp-corpora/ directory.
 # builtins
 import argparse
 import code
+import datetime
 import glob
 import os
 import subprocess
@@ -53,10 +54,34 @@ HEADER_FN = 'header.md'
 # file to use as footer for results
 FOOTER_FN = 'footer.md'
 
+BADGE_RESULT_FMT = '![](https://img.shields.io/badge/docs-{success}-{color}.svg?longCache=true&style=flat)'
+BADGE_DATE_FMT = '![](https://img.shields.io/badge/built-{date}-blue.svg?longCache=true&style=flat)'
 
 #
 # functions
 #
+
+def read(path: str) -> str:
+    with open(path, 'r') as f:
+        return f.read()
+
+
+def build_top(success: bool) -> str:
+    """Returns the markdown title and badges. Should go above header in output
+    file."""
+    badge_result = BADGE_RESULT_FMT.format(
+        success=('passing' if success else 'errors'),
+        color=('brightgreen' if success else 'red'),
+    )
+    badge_date = BADGE_DATE_FMT.format(date='{:%-m/%-d/%y}'.format(datetime.datetime.now()))
+    return '\n'.join([
+        '# nlp-corpora',
+        '',
+        badge_result,
+        badge_date,
+        '',
+    ])
+
 
 def get_size(path: str) -> str:
     """
@@ -225,26 +250,27 @@ def main() -> None:
         help='if provided, writes log to this path. If not 100%% of checks pass, always writes log to stderr.')
     args = parser.parse_args()
 
-    with open(HEADER_FN, 'r') as f:
-        header = f.read()
-    with open(FOOTER_FN, 'r') as f:
-        footer = f.read()
-
+    # run
     results = check(args.directory)
     success = compute_success(results)
 
-    out_md = generate_results_markdown(results)
-    out = '\n'.join([header, out_md, footer])
+    # build out md file
+    out = '\n'.join([
+        build_top(success),
+        read(HEADER_FN),
+        generate_results_markdown(results),
+        read(FOOTER_FN),
+    ])
 
-    # output
+    # write output
     if args.out_file is not None:
         with open(os.path.expanduser(args.out_file), 'w') as f:
             f.write(out)
     else:
         print(out)
 
-    # log. always write to log file, if provided. write to stderr only if the
-    # overall results was not 100% successful.
+    # write log. always write to log file, if provided. write to stderr only if
+    # the overall results was not 100% successful.
     log = generate_log(success, results)
     if args.log_file is not None:
         with open(os.path.expanduser(args.log_file), 'w') as f:

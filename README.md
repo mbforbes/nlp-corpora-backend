@@ -12,10 +12,6 @@ Current feature worklist:
 
 - [ ] Badge showing how recently checker job was run
 
-- [ ] Ensure email sends on problems
-
-- [ ] If possible, color code the check / cross marks
-
 - [ ] Transition to single check/cross in table. Have single report
   (overwritten at each run) with details.
 

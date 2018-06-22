@@ -1,5 +1,3 @@
-# nlp-corpora
-
 UW NLP maintains a repository of corpora for internal UW use on the UW CSE
 department fileserver at `/projects/nlp-corpora/`.
 
