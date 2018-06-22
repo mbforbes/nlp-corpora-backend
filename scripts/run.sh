@@ -12,9 +12,12 @@
 source ~/.bashrc
 export GIT_SSH_COMMAND='ssh -i ~/.ssh/robot_id_rsa'
 
-# setup 1: update self (ensure running latest version of backend)
-cd ~/repos/nlp-corpora-backend/
-git pull --rebase origin master
+# setup 1: update self (ensure running latest version of backend). note that we
+# add "1> ~/.cronlog 2>&1" to redirect stderr to stdout and then redirect
+# stdout to .cronlog. the first command creates a fresh .cronlog by doing > and
+# the next ones append to it with >>.
+cd ~/repos/nlp-corpora-backend/ 1> ~/.cronlog 2>&1
+git pull --rebase origin master 1>> ~/.cronlog 2>&1
 
 # step 2: run crawler
 pyenv activate nlp-corpora
@@ -25,4 +28,4 @@ pyenv deactivate
 cd ~/repos/nlp-corpora/
 git add .
 git commit -m "update `date '+%m/%d/%Y %H:%M:%S'`"
-git push origin master
+git push origin master 1>> ~/.cronlog 2>&1
