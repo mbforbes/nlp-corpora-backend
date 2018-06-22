@@ -1,16 +1,11 @@
 # nlp-corpora-backend
 
-![](https://img.shields.io/badge/docs-passing-brightgreen.svg?longCache=true&style=flat)
-![](https://img.shields.io/badge/built-6/22/18-blue.svg?longCache=true&style=flat)
-
 This repository contains the infrastructure to provide a live status of
 `/projects/nlp-corpora/` by crawling its contents.
 
 ## Contributing
 
 Current feature worklist:
-
-- [ ] Badge showing how recently checker job was run
 
 - [ ] Transition to single check/cross in table. Have single report
   (overwritten at each run) with details.
