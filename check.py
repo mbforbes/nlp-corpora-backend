@@ -1,9 +1,5 @@
 """
-Checker script to sanity check /projects/nlp-corpora/ directory.
-
-python3.6
-
-Writes to stdout.
+Checker script to crawl /projects/nlp-corpora/ directory.
 """
 
 #
@@ -12,10 +8,11 @@ Writes to stdout.
 
 # builtins
 import argparse
-import code  # TODO(mbforbes): Remove (for debugging).
+import code
 import glob
 import os
 import subprocess
+import sys
 from typing import Any, List, Optional
 
 # 3rd party
@@ -23,11 +20,11 @@ from mypy_extensions import TypedDict
 
 
 #
-# types
+# globals
 #
 
-# information we want from all results
 class DirResult(TypedDict):
+    """information we want from all results"""
     basename: str
     description: Optional[str]
     size: str
@@ -35,10 +32,6 @@ class DirResult(TypedDict):
     readme_exists: bool
     readme_complete: bool
 
-
-#
-# settings
-#
 
 # These are the things allowed to be in the top-level directory that aren't
 # checked.
@@ -92,14 +85,14 @@ def check_dir(path: str) -> DirResult:
     that case. Also, it's a full path, not just a local directory.
     """
     # define res upfront and mutate as we discover things
-    res = {
+    res: DirResult = {
         'basename': os.path.basename(path),
         'description': None,
         'size': get_size(path),
         'dir_clean': False,
         'readme_exists': False,
         'readme_complete': False,
-    }  # type: DirResult
+    }
 
     # edge case: if it's a file instead of a directory, everything else should
     # be marked as invalid and should just return now.
@@ -108,7 +101,6 @@ def check_dir(path: str) -> DirResult:
 
     # The rest of the options don't depend on whether the directory is clean,
     # so we just check that first.
-    # TODO: turn into reduce
     res['dir_clean'] = True
     for inner in glob.glob(os.path.join(path, '*')):
         if os.path.basename(inner) not in CLEAN_DIR_WHITELIST:
@@ -190,32 +182,75 @@ def generate_results_markdown(results: List[DirResult]) -> str:
     return '\n'.join([header, separator] + rows)
 
 
-def check(base_dir: str) -> str:
+def compute_success(results: List[DirResult]) -> bool:
+    """Returns whether we had 100% passing checks."""
+    for r in results:
+        if not (r['dir_clean'] and r['readme_exists'] and r['readme_complete']):
+            return False
+    return True
+
+
+def generate_log(success: bool, results: List[DirResult]) -> str:
+    """Takes results and generates log file for more detailed results."""
+    return '\n'.join([
+        'Overall pass: {}'.format(success),
+        '',
+        'Log not yet implemented',
+    ])
+
+
+def check(base_dir: str) -> List[DirResult]:
     paths = get_dirs(base_dir)
-    results = [check_dir(p) for p in paths]
-    # debug_print_results(results)
-    return generate_results_markdown(results)
+    return [check_dir(p) for p in paths]
 
 
 def main() -> None:
     # cmd line args
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description='Tool to check nlp-corpora directory and output documentation.',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
     parser.add_argument(
         '--directory',
         type=str,
         default='/projects/nlp-corpora/',
-        help='path to top-level corpus directory (default: "/projects/nlp-corpora/"')
+        help='path to top-level corpus directory')
+    parser.add_argument(
+        '--out-file',
+        type=str,
+        help='path to write output file. If not provided, writes to stdout.')
+    parser.add_argument(
+        '--log-file',
+        type=str,
+        help='if provided, writes log to this path. If not 100%% of checks pass, always writes log to stderr.')
     args = parser.parse_args()
 
     with open(HEADER_FN, 'r') as f:
         header = f.read()
-    status = check(args.directory)
     with open(FOOTER_FN, 'r') as f:
         footer = f.read()
-    res = '\n'.join([header, status, footer])
 
-    # could write to file, just writing to stdout
-    print(res)
+    results = check(args.directory)
+    success = compute_success(results)
+
+    out_md = generate_results_markdown(results)
+    out = '\n'.join([header, out_md, footer])
+
+    # output
+    if args.out_file is not None:
+        with open(os.path.expanduser(args.out_file), 'w') as f:
+            f.write(out)
+    else:
+        print(out)
+
+    # log. always write to log file, if provided. write to stderr only if the
+    # overall results was not 100% successful.
+    log = generate_log(success, results)
+    if args.log_file is not None:
+        with open(os.path.expanduser(args.log_file), 'w') as f:
+            f.write(log)
+    if not success:
+        print(log, file=sys.stderr)
 
 
 if __name__ == '__main__':
