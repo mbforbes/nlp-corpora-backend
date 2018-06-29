@@ -33,6 +33,7 @@ class DirResult(TypedDict):
     readme_exists: bool
     readme_desc: bool
     readme_proc_desc: bool
+    errors: List[str]
 
 
 # These are the things allowed to be in the top-level directory that aren't
@@ -119,25 +120,29 @@ def check_dir(path: str) -> DirResult:
         'readme_exists': False,
         'readme_desc': False,
         'readme_proc_desc': False,
+        'errors': [],
     }
 
     # edge case: if it's a file instead of a directory, everything else should
     # be marked as invalid and should just return now.
     if not os.path.isdir(path):
+        res['errors'].append('Not a directory but in top-level.')
         return res
 
     # The rest of the options don't depend on whether the directory is clean,
     # so we just check that first.
     res['dir_clean'] = True
     for inner in glob.glob(os.path.join(path, '*')):
-        if os.path.basename(inner) not in CLEAN_DIR_WHITELIST:
+        inner_basename = os.path.basename(inner)
+        if inner_basename not in CLEAN_DIR_WHITELIST:
             res['dir_clean'] = False
-            break
+            res['errors'].append('Directory not clean: bad entry: "{}".'.format(inner_basename))
 
     # Check whether readme even exists. If it doesn't it can't be complete and
     # can't have a description, so we just stop checking now and return.
     readme_fn = os.path.join(path, 'README.md')
     if not os.path.isfile(readme_fn):
+        res['errors'].append('Missing README.md')
         return res
     res['readme_exists'] = True
 
@@ -162,6 +167,8 @@ def check_dir(path: str) -> DirResult:
 
     # Must have something in desc to pass desc-having check.
     res['readme_desc'] = res['description'] is not None
+    if not res['readme_desc']:
+        res['errors'].append('Missing description (second non-empty line) in README.md')
 
     # Pre-check: if no "processed" directories exist, the README doesn't need
     # to talk about them.
@@ -174,9 +181,12 @@ def check_dir(path: str) -> DirResult:
     # them.
     full_readme = ' '.join(readme)
     for p_subdir in glob.glob(os.path.join(processed_dir, '*')):
-        if os.path.basename(p_subdir) not in full_readme:
+        p_subdir_basename = os.path.basename(p_subdir)
+        if p_subdir_basename not in full_readme:
             res['readme_proc_desc'] = False
-            break
+            res['errors'].append('Missing description in README.md for processed variant: "{}"'.format(
+                p_subdir_basename
+            ))
 
     return res
 
@@ -214,10 +224,12 @@ def compute_success(results: List[DirResult]) -> bool:
 
 def generate_log(success: bool, results: List[DirResult]) -> str:
     """Takes results and generates log file for more detailed results."""
+    # overall
     buffer = ['Overall pass: {}'.format(success), '']
+
+    # summary table
     fmt = '{!s:20.19} {!s:20.19} {!s:10.9} {!s:10.9} {!s:8.7} {!s:7.6} {!s:7.6}'
     header = ('dirname', 'desc', 'size', 'dir clean', 'README?', 'R-desc', 'R-proc')
-
     buffer.append(fmt.format(*header))
     buffer.append(fmt.format(*(['---'] * 7)))
     for res in results:
@@ -230,6 +242,17 @@ def generate_log(success: bool, results: List[DirResult]) -> str:
             fun_bool(res['readme_desc']),
             fun_bool(res['readme_proc_desc']),
         ))
+    buffer.append('')
+
+    # detailed errors per result
+    buffer.append('Detailed errors:')
+    for res in results:
+        if len(res['errors']) > 0:
+            buffer.append(res['basename'])
+            buffer.append('-'*80)
+            for e in res['errors']:
+                buffer.append(' - {}'.format(e))
+            buffer.append('')
 
     return '\n'.join(buffer)
 
