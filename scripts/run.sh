@@ -21,7 +21,7 @@ git pull --rebase origin master 1>> ~/.cronlog 2>&1
 
 # step 2: run crawler
 pyenv activate nlp-corpora 1>> ~/.cronlog 2>&1
-python check.py --out-file ~/repos/nlp-corpora/README.md --log-file ~/repos/nlp-corpora/BUILD.md
+python check.py --out-file ~/repos/nlp-corpora/README.md --log-file ~/repos/nlp-corpora/BUILD.txt
 pyenv deactivate
 
 # setp 3: push updated doc
