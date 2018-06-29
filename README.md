@@ -3,6 +3,31 @@
 This repository contains the infrastructure to provide a live status of
 `/projects/nlp-corpora/` by crawling its contents.
 
+## Installation
+
+```bash
+# create a fresh virtualenv. I use pyenv. You can use whatever.
+# Use python >= 3.6.5. Then:
+pip install -r requirements.txt
+```
+
+## Running
+
+```bash
+# also prints log to stderr if any cheks failed. (This behavior so cron
+# auto sends an email to you if anything fails, but not if things pass.)
+python check.py \
+    --directory /projects/nlp-corpora/ \
+    --out-file out.md \
+    --log-file log.txt
+
+# To run on the test directories (sorry Nelson, no automated tests yet), I run
+# this to ignore the output markdown and see only the log.
+python check.py \
+    --directory test/ \
+    --out-file /dev/null
+```
+
 ## Contributing
 
 Current feature worklist:
