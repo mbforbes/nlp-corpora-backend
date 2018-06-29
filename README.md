@@ -32,9 +32,6 @@ python check.py \
 
 Current feature worklist:
 
-- [ ] Transition to single check/cross in table. Have single report
-  (overwritten at each run) with details.
-
 - [ ] Expand checks:
 
     - [ ] Owner checks (TODO: should only be admins?)

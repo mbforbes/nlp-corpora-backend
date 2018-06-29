@@ -1,6 +1,6 @@
 # title
 
-This is a sample description.
+So detailed.
 
 **foo** was made like this.
 

@@ -31,7 +31,8 @@ class DirResult(TypedDict):
     size: str
     dir_clean: bool
     readme_exists: bool
-    readme_complete: bool
+    readme_desc: bool
+    readme_proc_desc: bool
 
 
 # These are the things allowed to be in the top-level directory that aren't
@@ -97,7 +98,7 @@ def get_dirs(base_dir: str) -> List[str]:
     for path in globs:
         if os.path.basename(path) not in BLACKLIST:
             paths.append(path)
-    return paths
+    return sorted(paths)
 
 
 def check_dir(path: str) -> DirResult:
@@ -116,7 +117,8 @@ def check_dir(path: str) -> DirResult:
         'size': get_size(path),
         'dir_clean': False,
         'readme_exists': False,
-        'readme_complete': False,
+        'readme_desc': False,
+        'readme_proc_desc': False,
     }
 
     # edge case: if it's a file instead of a directory, everything else should
@@ -158,9 +160,12 @@ def check_dir(path: str) -> DirResult:
             res['description'] = line
             break
 
+    # Must have something in desc to pass desc-having check.
+    res['readme_desc'] = res['description'] is not None
+
     # Pre-check: if no "processed" directories exist, the README doesn't need
     # to talk about them.
-    res['readme_complete'] = True
+    res['readme_proc_desc'] = True
     processed_dir = os.path.join(path, 'processed')
     if not os.path.isdir(processed_dir):
         return res
@@ -170,21 +175,10 @@ def check_dir(path: str) -> DirResult:
     full_readme = ' '.join(readme)
     for p_subdir in glob.glob(os.path.join(processed_dir, '*')):
         if os.path.basename(p_subdir) not in full_readme:
-            res['readme_complete'] = False
+            res['readme_proc_desc'] = False
             break
 
     return res
-
-
-def debug_print_results(results: List[DirResult]) -> None:
-    fmt = '{} \t {} \t {} \t {} \t {} \t {}'
-    print(fmt.format(
-        'dirname', 'desc', 'size', 'dir clean', 'README exists',
-        'README complete'))
-    for res in results:
-        print(fmt.format(
-            res['basename'], res['description'], res['size'], res['dir_clean'],
-            res['readme_exists'], res['readme_complete']))
 
 
 def fun_bool(boring: bool) -> str:
@@ -192,36 +186,52 @@ def fun_bool(boring: bool) -> str:
 
 
 def generate_results_markdown(results: List[DirResult]) -> str:
-    fmt = '{} | {} | {} | {} | {} | {}'
-    header = fmt.format('dirname', 'desc', 'size', 'dir clean',
-        'README exists', 'README complete')
-    separator = fmt.format('---', '---', '---', '---', '---', '---')
+    fmt = '{} | {} | {} | {}'
+    header = fmt.format('dirname', 'desc', 'size', 'status')
+    separator = fmt.format(*(['---']*4))
     rows = []
     for res in results:
         rows.append(fmt.format(
-            res['basename'], res['description'], res['size'],
-            fun_bool(res['dir_clean']),
-            fun_bool(res['readme_exists']),
-            fun_bool(res['readme_complete'])
+            res['basename'],
+            res['description'],
+            res['size'],
+            fun_bool(compute_result_success(res)),
         ))
     return '\n'.join([header, separator] + rows)
+
+
+def compute_result_success(r: DirResult) -> bool:
+    return r['dir_clean'] and r['readme_exists'] and r['readme_desc'] and r['readme_proc_desc']
 
 
 def compute_success(results: List[DirResult]) -> bool:
     """Returns whether we had 100% passing checks."""
     for r in results:
-        if not (r['dir_clean'] and r['readme_exists'] and r['readme_complete']):
+        if not compute_result_success(r):
             return False
     return True
 
 
 def generate_log(success: bool, results: List[DirResult]) -> str:
     """Takes results and generates log file for more detailed results."""
-    return '\n'.join([
-        'Overall pass: {}'.format(success),
-        '',
-        'Log not yet implemented',
-    ])
+    buffer = ['Overall pass: {}'.format(success), '']
+    fmt = '{!s:20.19} {!s:20.19} {!s:10.9} {!s:10.9} {!s:8.7} {!s:7.6} {!s:7.6}'
+    header = ('dirname', 'desc', 'size', 'dir clean', 'README?', 'R-desc', 'R-proc')
+
+    buffer.append(fmt.format(*header))
+    buffer.append(fmt.format(*(['---'] * 7)))
+    for res in results:
+        buffer.append(fmt.format(
+            res['basename'],
+            res['description'],
+            res['size'],
+            fun_bool(res['dir_clean']),
+            fun_bool(res['readme_exists']),
+            fun_bool(res['readme_desc']),
+            fun_bool(res['readme_proc_desc']),
+        ))
+
+    return '\n'.join(buffer)
 
 
 def check(base_dir: str) -> List[DirResult]:
