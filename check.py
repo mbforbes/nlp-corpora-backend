@@ -12,9 +12,11 @@ import code
 import datetime
 import glob
 import os
+import pwd
+import stat
 import subprocess
 import sys
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Set, Tuple
 
 # 3rd party
 from mypy_extensions import TypedDict
@@ -100,6 +102,44 @@ def get_dirs(base_dir: str) -> List[str]:
         if os.path.basename(path) not in BLACKLIST:
             paths.append(path)
     return sorted(paths)
+
+
+def check_op(
+        path: str,
+        ok_owners: Set[str],
+        want_perms: int,
+        change: bool = False,
+    ) -> Tuple[bool, bool, List[str]]:
+    """Check owner and permissions (and maybe change them)."""
+    owner_passed = True
+    perms_passed = True
+    errors: List[str] = []
+
+    s = os.stat(path)
+
+    # check owner
+    owner = pwd.getpwuid(s.st_uid).pw_name
+    if owner not in ok_owners:
+        owner_passed = False
+        errors.append('Path "{}" has owner "{}", but needs to be one of "{}"'.format(
+            path, owner, ok_owners,
+        ))
+
+    # pre-check whether script could change permissions if asked to.
+    can_change = os.getuid() == s.st_uid
+
+    # check permissions
+    if s.st_mode != want_perms:
+        # failed; maybe change
+        if change and can_change:
+            os.chmod(path, want_perms)
+        else:
+            perms_passed = False
+            errors.append('Path "{}" has mode "{}", but want mode to be "{}"'.format(
+                path, s.st_mode, want_perms,
+            ))
+
+    return (owner_passed, perms_passed, errors)
 
 
 def check_dir(path: str) -> DirResult:
@@ -245,14 +285,15 @@ def generate_log(success: bool, results: List[DirResult]) -> str:
     buffer.append('')
 
     # detailed errors per result
-    buffer.append('Detailed errors:')
-    for res in results:
-        if len(res['errors']) > 0:
-            buffer.append(res['basename'])
-            buffer.append('-'*80)
-            for e in res['errors']:
-                buffer.append(' - {}'.format(e))
-            buffer.append('')
+    if not success:
+        buffer.append('Detailed errors:')
+        for res in results:
+            if len(res['errors']) > 0:
+                buffer.append(res['basename'])
+                buffer.append('-'*80)
+                for e in res['errors']:
+                    buffer.append(' - {}'.format(e))
+                buffer.append('')
 
     return '\n'.join(buffer)
 
