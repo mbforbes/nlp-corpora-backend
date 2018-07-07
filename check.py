@@ -11,12 +11,14 @@ import argparse
 import code
 import datetime
 import glob
+import grp
+import json
 import os
 import pwd
 import stat
 import subprocess
 import sys
-from typing import Any, List, Optional, Set, Tuple
+from typing import Any, List, Optional, Set, Tuple, Dict
 
 # 3rd party
 from mypy_extensions import TypedDict
@@ -31,12 +33,56 @@ class DirResult(TypedDict):
     basename: str
     description: Optional[str]
     size: str
+    group_ok: bool
+    owner_ok: bool
+    perms_ok: bool
     dir_clean: bool
     readme_exists: bool
     readme_desc: bool
     readme_proc_desc: bool
     errors: List[str]
 
+
+class RestrictedGroup(TypedDict):
+    """Information about a restricted group (provided in json file)."""
+    desc: str
+
+
+class Permissions(TypedDict):
+    """A set of permissions to use for a single corpus directory."""
+    # top = the named corpus directory
+    top: int
+    # readme = README.md
+    readme: int
+    # contents = original/, processed/, and any subfolders/files
+    contents_dir: int
+    contents_file: int
+
+# r--r--r--
+PERM_ALL_R = stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH
+
+# r-xr-xr-x
+PERM_ALL_RX = PERM_ALL_R | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+
+# r--r-----
+PERM_UG_R = stat.S_IRUSR | stat.S_IRGRP
+
+# r-xr-x---
+PERM_UG_RX = PERM_UG_R | stat.S_IXUSR | stat.S_IXGRP
+
+STD_PERMS: Permissions = {
+    'top': PERM_ALL_RX,
+    'readme': PERM_ALL_R,
+    'contents_dir': PERM_ALL_RX,
+    'contents_file': PERM_ALL_R,
+}
+
+RESTRICTED_PERMS: Permissions = {
+    'top': PERM_ALL_RX,
+    'readme': PERM_ALL_R,
+    'contents_dir': PERM_UG_RX,
+    'contents_file': PERM_UG_R,
+}
 
 # These are the things allowed to be in the top-level directory that aren't
 # checked.
@@ -104,6 +150,46 @@ def get_dirs(base_dir: str) -> List[str]:
     return sorted(paths)
 
 
+def extract_group_config(path: str) -> Tuple[Set[str], Dict[str, RestrictedGroup]]:
+    """Returns (std_grps, restricted_grps)"""
+    config = json.loads(read(path))
+    return (set(config['standard']), config['restricted'])
+
+
+def get_grp(path: str) -> str:
+    return grp.getgrgid(os.stat(path).st_gid).gr_name
+
+
+def check_grp(path: str, want_grp: str) -> Tuple[bool, List[str]]:
+    """Returns whether it passed, and any errors."""
+    actual_grp = get_grp(path)
+    if want_grp != actual_grp:
+        return False, ['Expected "{}" to have group "{}", but had group "{}"'.format(
+            path, want_grp, actual_grp,
+        )]
+    return True, []
+
+
+def get_perms(
+        path: str,
+        std_grps: Set[str],
+        restrict_grps: Dict[str, RestrictedGroup],
+    ) -> Tuple[Permissions, str, List[str]]:
+    """Returns (permissions to use, group name, list of error messages)"""
+    grp_name = get_grp(path)
+    if grp_name in std_grps:
+        return STD_PERMS, grp_name, []
+    elif grp_name in restrict_grps:
+        return RESTRICTED_PERMS, grp_name, []
+    else:
+        all_grps = ', '.join(list(std_grps) + list(restrict_grps.keys()))
+        return (
+            RESTRICTED_PERMS,
+            grp_name,
+            ['Unknown group "{}"; known groups: "{}"'.format(grp_name, all_grps)],
+        )
+
+
 def check_op(
         path: str,
         ok_owners: Set[str],
@@ -142,7 +228,52 @@ def check_op(
     return (owner_passed, perms_passed, errors)
 
 
-def check_dir(path: str) -> DirResult:
+def check_gop(
+        res: DirResult,
+        path: str,
+        want_grp: str,
+        ok_owners: Set[str],
+        want_perms: int,
+        change: bool = False,
+    ) -> None:
+    """Wrapper to help in checking group, owner, and perms, and merge results
+    into current results."""
+    # grp
+    grp_ok, grp_errors = check_grp(path, want_grp)
+    res['group_ok'] = res['group_ok'] and grp_ok
+    res['errors'].extend(grp_errors)
+
+    # owner + perms
+    owner_ok, perms_ok, op_errors = check_op(path, ok_owners, want_perms, change)
+    res['owner_ok'] = res['owner_ok'] and owner_ok
+    res['perms_ok'] = res['perms_ok'] and perms_ok
+    res['errors'].extend(op_errors)
+
+
+def walk_check(
+        res: DirResult,
+        root: str,
+        want_grp: str,
+        ok_owners: Set[str],
+        want_dir_perms: int,
+        want_file_perms: int,
+        change: bool = False,
+    ) -> None:
+    """Checks group / owner / perms recursively under a directory (e.g.,
+    'original/' or 'processed/')."""
+    for dirpath, dirnames, filenames in os.walk(root):
+        check_gop(res, dirpath, want_grp, ok_owners, want_dir_perms, change)
+        for filename in filenames:
+            check_gop(res, os.path.join(dirpath, filename), want_grp, ok_owners, want_file_perms, change)
+
+
+def check_dir(
+        path: str,
+        std_grps: Set[str],
+        restricted_grps: Dict[str, RestrictedGroup],
+        ok_owners: Set[str],
+        fix_perms: bool = False,
+    ) -> DirResult:
     """
     For a corpus directory (`path`), checks its properties to ensure they
     conform to the nlp-corpora guidelines.
@@ -156,6 +287,9 @@ def check_dir(path: str) -> DirResult:
         'basename': os.path.basename(path),
         'description': None,
         'size': get_size(path),
+        'group_ok': True,
+        'owner_ok': True,
+        'perms_ok': True,
         'dir_clean': False,
         'readme_exists': False,
         'readme_desc': False,
@@ -168,6 +302,18 @@ def check_dir(path: str) -> DirResult:
     if not os.path.isdir(path):
         res['errors'].append('Not a directory but in top-level.')
         return res
+
+    # get set of permissions. if the group isn't known, we don't know the right
+    # permissions to use and we probably don't want everything below it to have
+    # the same (wrong) group, so we stop early.
+    perms, grp_name, grp_errors = get_perms(path, std_grps, restricted_grps)
+    if len(grp_errors) > 0:
+        res['group_ok'] = False
+        res['errors'].extend(grp_errors)
+        return res
+
+    # check group + owner + perms of directory itself
+    check_gop(res, path, grp_name, ok_owners, perms['top'], fix_perms)
 
     # The rest of the options don't depend on whether the directory is clean,
     # so we just check that first.
@@ -185,6 +331,9 @@ def check_dir(path: str) -> DirResult:
         res['errors'].append('Missing README.md')
         return res
     res['readme_exists'] = True
+
+    # check readme group, owner, perms
+    check_gop(res, readme_fn, grp_name, ok_owners, perms['readme'], fix_perms)
 
     # README.md format:
     #
@@ -210,6 +359,17 @@ def check_dir(path: str) -> DirResult:
     if not res['readme_desc']:
         res['errors'].append('Missing description (second non-empty line) in README.md')
 
+    # Check original/ directory recursively for group/owner/perms.
+    walk_check(
+        res,
+        os.path.join(path, 'original'),
+        grp_name,
+        ok_owners,
+        perms['contents_dir'],
+        perms['contents_file'],
+        fix_perms,
+    )
+
     # Pre-check: if no "processed" directories exist, the README doesn't need
     # to talk about them.
     res['readme_proc_desc'] = True
@@ -227,6 +387,17 @@ def check_dir(path: str) -> DirResult:
             res['errors'].append('Missing description in README.md for processed variant: "{}"'.format(
                 p_subdir_basename
             ))
+
+    # Check processed/ directory recursively for group/owner/perms.
+    walk_check(
+        res,
+        processed_dir,
+        grp_name,
+        ok_owners,
+        perms['contents_dir'],
+        perms['contents_file'],
+        fix_perms,
+    )
 
     return res
 
@@ -251,7 +422,11 @@ def generate_results_markdown(results: List[DirResult]) -> str:
 
 
 def compute_result_success(r: DirResult) -> bool:
-    return r['dir_clean'] and r['readme_exists'] and r['readme_desc'] and r['readme_proc_desc']
+    return (
+        r['group_ok'] and r['owner_ok'] and r['perms_ok'] and
+        r['dir_clean'] and r['readme_exists'] and r['readme_desc'] and
+        r['readme_proc_desc']
+    )
 
 
 def compute_success(results: List[DirResult]) -> bool:
@@ -268,15 +443,18 @@ def generate_log(success: bool, results: List[DirResult]) -> str:
     buffer = ['Overall pass: {}'.format(success), '']
 
     # summary table
-    fmt = '{!s:20.19} {!s:20.19} {!s:10.9} {!s:10.9} {!s:8.7} {!s:7.6} {!s:7.6}'
-    header = ('dirname', 'desc', 'size', 'dir clean', 'README?', 'R-desc', 'R-proc')
+    fmt = '{!s:20.19} {!s:20.19} {!s:10.9} {!s:6.5} {!s:6.5} {!s:6.5} {!s:10.9} {!s:8.7} {!s:7.6} {!s:7.6}'
+    header = ('dirname', 'desc', 'size', 'group', 'owner', 'perms', 'dir clean', 'README?', 'R-desc', 'R-proc')
     buffer.append(fmt.format(*header))
-    buffer.append(fmt.format(*(['---'] * 7)))
+    buffer.append(fmt.format(*(['---'] * 10)))
     for res in results:
         buffer.append(fmt.format(
             res['basename'],
             res['description'],
             res['size'],
+            fun_bool(res['group_ok']),
+            fun_bool(res['owner_ok']),
+            fun_bool(res['perms_ok']),
             fun_bool(res['dir_clean']),
             fun_bool(res['readme_exists']),
             fun_bool(res['readme_desc']),
@@ -298,9 +476,15 @@ def generate_log(success: bool, results: List[DirResult]) -> str:
     return '\n'.join(buffer)
 
 
-def check(base_dir: str) -> List[DirResult]:
+def check(
+        base_dir: str,
+        std_grps: Set[str],
+        restricted_grps: Dict[str, RestrictedGroup],
+        ok_owners: Set[str],
+        fix_perms: bool = False,
+    ) -> List[DirResult]:
     paths = get_dirs(base_dir)
-    return [check_dir(p) for p in paths]
+    return [check_dir(p, std_grps, restricted_grps, ok_owners, fix_perms) for p in paths]
 
 
 def main() -> None:
@@ -315,6 +499,20 @@ def main() -> None:
         default='/projects/nlp-corpora/',
         help='path to top-level corpus directory')
     parser.add_argument(
+        '--ok-owners',
+        type=str,
+        default='mbforbes',
+        help='comma-separated list of allowed owners')
+    parser.add_argument(
+        '--group-config',
+        type=str,
+        default='groups.json',
+        help='json file containing group information')
+    parser.add_argument(
+        '--fix-perms',
+        action='store_true',
+        help='whether this should attempt to fix permission errors it finds')
+    parser.add_argument(
         '--out-file',
         type=str,
         help='path to write output file. If not provided, writes to stdout.')
@@ -324,8 +522,12 @@ def main() -> None:
         help='if provided, writes log to this path. If not 100%% of checks pass, always writes log to stderr.')
     args = parser.parse_args()
 
+    # extract
+    std_grps, restricted_grps = extract_group_config(args.group_config)
+    ok_owners = set(args.ok_owners.split(','))
+
     # run
-    results = check(args.directory)
+    results = check(args.directory, std_grps, restricted_grps, ok_owners, args.fix_perms)
     success = compute_success(results)
 
     # build out md file

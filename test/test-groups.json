@@ -1,0 +1,10 @@
+{
+	"standard": [
+		"staff"
+	],
+	"restricted": {
+		"nlpc-byu": {
+			"desc": "TODO"
+		}
+	}
+}

@@ -24,8 +24,11 @@ python check.py \
 # To run on the test directories (sorry Nelson, no automated tests yet), I run
 # this to ignore the output markdown and see only the log.
 python check.py \
-    --directory test/ \
+    --directory test/test-nlp-corpora/ \
+    --ok-owners max \
+    --group-config test/test-groups.json \
     --out-file /dev/null
+
 ```
 
 ## Contributing
