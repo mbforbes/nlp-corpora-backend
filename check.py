@@ -215,14 +215,15 @@ def check_op(
     can_change = os.getuid() == s.st_uid
 
     # check permissions
-    if s.st_mode != want_perms:
+    cur_perms = stat.S_IMODE(s.st_mode)
+    if cur_perms != want_perms:
         # failed; maybe change
         if change and can_change:
             os.chmod(path, want_perms)
         else:
             perms_passed = False
             errors.append('Path "{}" has mode "{}", but want mode to be "{}"'.format(
-                path, s.st_mode, want_perms,
+                path, cur_perms, want_perms,
             ))
 
     return (owner_passed, perms_passed, errors)
