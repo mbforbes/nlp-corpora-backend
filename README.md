@@ -35,16 +35,6 @@ python check.py \
 
 Current feature worklist:
 
-- [ ] Expand checks:
-
-    - [ ] Owner checks (TODO: should only be admins?)
-
-    - [ ] Permissions checks (TODO: )
-
-    - [ ] `g+s` (i.e., `chmod g+s directory/`) permissions: do we need it on
-      all directories (not just top-level ones), and if so, include in
-      permissions checks.
-
 - [ ] Better docs: Copy corpus directories' `README.md`s into here (under
   corpus names) and link on status table so that all docs can be browsed from
   this master README.md
