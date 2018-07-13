@@ -235,19 +235,27 @@ def check_gop(
         ok_owners: Set[str],
         want_perms: int,
         change: bool = False,
-    ) -> None:
+        extend_errors: bool = True,
+    ) -> Tuple[bool, bool, bool]:
     """Wrapper to help in checking group, owner, and perms, and merge results
-    into current results."""
+    into current results.
+
+    extend_errors --- provided to avoid GB of logs when all files are wrong LOL
+    """
     # grp
     grp_ok, grp_errors = check_grp(path, want_grp)
     res['group_ok'] = res['group_ok'] and grp_ok
-    res['errors'].extend(grp_errors)
+    if extend_errors:
+        res['errors'].extend(grp_errors)
 
     # owner + perms
     owner_ok, perms_ok, op_errors = check_op(path, ok_owners, want_perms, change)
     res['owner_ok'] = res['owner_ok'] and owner_ok
     res['perms_ok'] = res['perms_ok'] and perms_ok
-    res['errors'].extend(op_errors)
+    if extend_errors:
+        res['errors'].extend(op_errors)
+
+    return grp_ok, owner_ok, perms_ok
 
 
 def walk_check(
@@ -258,13 +266,28 @@ def walk_check(
         want_dir_perms: int,
         want_file_perms: int,
         change: bool = False,
+        verbose: bool = False,
     ) -> None:
     """Checks group / owner / perms recursively under a directory (e.g.,
     'original/' or 'processed/')."""
+    g, o, p = True, True, True
     for dirpath, dirnames, filenames in os.walk(root):
-        check_gop(res, dirpath, want_grp, ok_owners, want_dir_perms, change)
+        rg, ro, rp = check_gop(res, dirpath, want_grp, ok_owners, want_dir_perms, change, verbose)
+        g, o, p = g and rg, o and ro, p and rp
         for filename in filenames:
-            check_gop(res, os.path.join(dirpath, filename), want_grp, ok_owners, want_file_perms, change)
+            rg, ro, rp = check_gop(res, os.path.join(dirpath, filename), want_grp, ok_owners, want_file_perms, change, verbose)
+            g, o, p = g and rg, o and ro, p and rp
+
+    # if not verbose, we didn't add individual error messages, so add some now
+    if not verbose:
+        base_msg = 'One or more file/dirs at/below "{}" has {} errors.'
+        if not g:
+            res['errors'].append(base_msg.format(root, 'group'))
+        if not o:
+            res['errors'].append(base_msg.format(root, 'owner'))
+        if not p:
+            res['errors'].append(base_msg.format(root, 'permission'))
+
 
 
 def check_dir(
@@ -273,6 +296,7 @@ def check_dir(
         restricted_grps: Dict[str, RestrictedGroup],
         ok_owners: Set[str],
         fix_perms: bool = False,
+        verbose: bool = False,
     ) -> DirResult:
     """
     For a corpus directory (`path`), checks its properties to ensure they
@@ -368,6 +392,7 @@ def check_dir(
         perms['contents_dir'],
         perms['contents_file'],
         fix_perms,
+        verbose,
     )
 
     # Pre-check: if no "processed" directories exist, the README doesn't need
@@ -397,6 +422,7 @@ def check_dir(
         perms['contents_dir'],
         perms['contents_file'],
         fix_perms,
+        verbose,
     )
 
     return res
@@ -482,9 +508,13 @@ def check(
         restricted_grps: Dict[str, RestrictedGroup],
         ok_owners: Set[str],
         fix_perms: bool = False,
+        verbose: bool = False,
     ) -> List[DirResult]:
     paths = get_dirs(base_dir)
-    return [check_dir(p, std_grps, restricted_grps, ok_owners, fix_perms) for p in paths]
+    return [
+        check_dir(p, std_grps, restricted_grps, ok_owners, fix_perms, verbose)
+        for p in paths
+    ]
 
 
 def main() -> None:
@@ -513,6 +543,10 @@ def main() -> None:
         action='store_true',
         help='whether this should attempt to fix permission errors it finds')
     parser.add_argument(
+        '--verbose',
+        action='store_true',
+        help='whether to log error messages for every problematic file')
+    parser.add_argument(
         '--out-file',
         type=str,
         help='path to write output file. If not provided, writes to stdout.')
@@ -527,7 +561,7 @@ def main() -> None:
     ok_owners = set(args.ok_owners.split(','))
 
     # run
-    results = check(args.directory, std_grps, restricted_grps, ok_owners, args.fix_perms)
+    results = check(args.directory, std_grps, restricted_grps, ok_owners, args.fix_perms, args.verbose)
     success = compute_success(results)
 
     # build out md file
