@@ -7,5 +7,4 @@ proposing new additions.
 
 ## Live Status
 
-Below is the live status of the corpora, updated daily ([legend
-below](#table-legend)).
+Below is the live status of the corpora, updated daily.
