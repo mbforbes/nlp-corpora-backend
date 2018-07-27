@@ -35,15 +35,17 @@ python check.py \
 
 Current feature worklist:
 
-- [ ] Better docs: Copy corpus directories' `README.md`s into here (under
-  corpus names) and link on status table so that all docs can be browsed from
-  this master README.md
+- [ ] Add restricted access column
+
+- [ ] Clean up existing entries
 
 - [ ] Overall usage
 
     - [ ] Pie chart showing overall usage breakdown
 
     - [ ] Fail overall check (+ email) if usage gets above threshold (e.g., 95%)
+
+- [ ] Check if staging grounds empty
 
 - [ ] Migrate this to `uwnlp` github
 

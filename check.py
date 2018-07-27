@@ -439,7 +439,7 @@ def fun_bool(boring: bool) -> str:
 
 def generate_results_markdown(results: List[DirResult]) -> str:
     fmt = '{} | {} | {} | {}'
-    header = fmt.format('dirname', 'desc', 'size', 'status')
+    header = fmt.format('Corpus', 'Description', 'Size', 'Status')
     separator = fmt.format(*(['---']*4))
     rows = []
     for res in results:

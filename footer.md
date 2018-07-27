@@ -130,9 +130,3 @@ of the webpage).
 To help contribute to this project, please check out the [backend
 repository](https://github.com/mbforbes/nlp-corpora-backend) and open issues or
 pull requests there.
-
-
-
-## Maintainers
-
-- [Max Forbes](https://github.com/mbforbes)
