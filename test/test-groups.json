@@ -1,6 +1,7 @@
 {
 	"standard": [
-		"staff"
+		"staff",
+		"max"
 	],
 	"restricted": {
 		"nlpc-byu": {

@@ -15,6 +15,7 @@ import grp
 import json
 import os
 import pwd
+import shutil
 import stat
 import subprocess
 import sys
@@ -38,6 +39,7 @@ class DirResult(TypedDict):
     perms_ok: bool
     dir_clean: bool
     readme_exists: bool
+    readme_path: Optional[str]
     readme_desc: bool
     readme_proc_desc: bool
     errors: List[str]
@@ -317,6 +319,7 @@ def check_dir(
         'perms_ok': True,
         'dir_clean': False,
         'readme_exists': False,
+        'readme_path': None,
         'readme_desc': False,
         'readme_proc_desc': False,
         'errors': [],
@@ -356,6 +359,7 @@ def check_dir(
         res['errors'].append('Missing README.md')
         return res
     res['readme_exists'] = True
+    res['readme_path'] = readme_fn
 
     # check readme group, owner, perms
     check_gop(res, readme_fn, grp_name, ok_owners, perms['readme'], fix_perms)
@@ -440,7 +444,7 @@ def generate_results_markdown(results: List[DirResult]) -> str:
     rows = []
     for res in results:
         rows.append(fmt.format(
-            res['basename'],
+            '[{}]({})'.format(res['basename'], os.path.join('doc/', res['basename'])),
             res['description'],
             res['size'],
             fun_bool(compute_result_success(res)),
@@ -462,6 +466,31 @@ def compute_success(results: List[DirResult]) -> bool:
         if not compute_result_success(r):
             return False
     return True
+
+
+def build_doc_dir(results: List[DirResult], doc_dir: str) -> None:
+    # clean doc dir to remove anything that exists, then create it fresh
+    if os.path.exists(doc_dir):
+        if os.path.isdir(doc_dir):
+            shutil.rmtree(doc_dir)
+        else:
+            os.remove(doc_dir)
+    os.makedirs(doc_dir)
+
+    for res in results:
+        # make the dir
+        corpus_dir = os.path.join(doc_dir, res['basename'])
+        os.makedirs(corpus_dir)
+
+        # either copy real readme, or write a tmp dummy one
+        readme_fn = os.path.join(corpus_dir, 'README.md')
+        if res['readme_exists'] and res['readme_path'] is not None:
+            shutil.copy(res['readme_path'], readme_fn)
+        else:
+            with open(readme_fn, 'w') as f:
+                f.write('# {}\n\n(readme is missing! add one soon!)\n'.format(
+                    res['basename'],
+                ))
 
 
 def generate_log(success: bool, results: List[DirResult]) -> str:
@@ -555,6 +584,10 @@ def main() -> None:
         '--log-file',
         type=str,
         help='if provided, writes log to this path. If not 100%% of checks pass, always writes log to stderr.')
+    parser.add_argument(
+        '--doc-dir',
+        type=str,
+        help='if provided, DESTROYS this dir if it exists, creates it fresh, and then writes directories and readmes for all corpora under it.')
     args = parser.parse_args()
 
     # extract
@@ -579,6 +612,10 @@ def main() -> None:
             f.write(out)
     else:
         print(out)
+
+    # maybe write doc dir
+    if args.doc_dir is not None:
+        build_doc_dir(results, args.doc_dir)
 
     # write log. always write to log file, if provided. write to stderr only if
     # the overall results was not 100% successful.

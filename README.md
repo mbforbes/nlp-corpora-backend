@@ -18,8 +18,9 @@ pip install -r requirements.txt
 # auto sends an email to you if anything fails, but not if things pass.)
 python check.py \
     --directory /projects/nlp-corpora/ \
-    --out-file out.md \
-    --log-file log.txt
+    --out-file ~/repos/nlp-corpora/README.md \
+    --log-file ~/repos/nlp-corpora/BUILD.txt \
+    --doc-dir ~/repos/nlp-corpora/doc
 
 # To run on the test directories (sorry Nelson, no automated tests yet), I run
 # this to ignore the output markdown and see only the log.
@@ -28,7 +29,6 @@ python check.py \
     --ok-owners max \
     --group-config test/test-groups.json \
     --out-file /dev/null
-
 ```
 
 ## Contributing
