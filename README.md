@@ -35,8 +35,6 @@ python check.py \
 
 Current feature worklist:
 
-- [ ] Add restricted access column
-
 - [ ] Clean up existing entries
 
 - [ ] Overall usage

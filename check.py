@@ -35,6 +35,7 @@ class DirResult(TypedDict):
     description: Optional[str]
     size: str
     group_ok: bool
+    group: Optional[str]
     owner_ok: bool
     perms_ok: bool
     dir_clean: bool
@@ -315,6 +316,7 @@ def check_dir(
         'description': None,
         'size': get_size(path),
         'group_ok': True,
+        'group': None,
         'owner_ok': True,
         'perms_ok': True,
         'dir_clean': False,
@@ -339,6 +341,7 @@ def check_dir(
         res['group_ok'] = False
         res['errors'].extend(grp_errors)
         return res
+    res['group'] = grp_name
 
     # check group + owner + perms of directory itself
     check_gop(res, path, grp_name, ok_owners, perms['top'], fix_perms)
@@ -437,16 +440,17 @@ def fun_bool(boring: bool) -> str:
     return '✔' if boring else '✗'
 
 
-def generate_results_markdown(results: List[DirResult]) -> str:
-    fmt = '{} | {} | {} | {}'
-    header = fmt.format('Corpus', 'Description', 'Size', 'Status')
-    separator = fmt.format(*(['---']*4))
+def generate_results_markdown(results: List[DirResult], std_grps: Set[str]) -> str:
+    fmt = '{} | {} | {} | {} | {}'
+    header = fmt.format('Corpus', 'Description', 'Size', 'Access', 'Status')
+    separator = fmt.format(*(['---']*5))
     rows = []
     for res in results:
         rows.append(fmt.format(
             '[{}]({})'.format(res['basename'], os.path.join('doc/', res['basename'])),
             res['description'],
             res['size'],
+            fun_bool(True) if res['group'] in std_grps else '`{}`'.format(res['group']),
             fun_bool(compute_result_success(res)),
         ))
     return '\n'.join([header, separator] + rows)
@@ -602,7 +606,7 @@ def main() -> None:
     out = '\n'.join([
         build_top(success),
         read(HEADER_FN),
-        generate_results_markdown(results),
+        generate_results_markdown(results, std_grps),
         read(FOOTER_FN),
     ])
 
