@@ -615,7 +615,7 @@ def main() -> None:
 
     # maybe write doc dir
     if args.doc_dir is not None:
-        build_doc_dir(results, args.doc_dir)
+        build_doc_dir(results, os.path.expanduser(args.doc_dir))
 
     # write log. always write to log file, if provided. write to stderr only if
     # the overall results was not 100% successful.
