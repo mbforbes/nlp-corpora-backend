@@ -43,7 +43,7 @@ Current feature worklist:
 
     - [ ] Fail overall check (+ email) if usage gets above threshold (e.g., 95%)
 
-- [ ] Check if staging grounds empty
+- [ ] Check whether `_staging` and `nobackup` empty
 
 - [ ] Migrate this to `uwnlp` github
 
