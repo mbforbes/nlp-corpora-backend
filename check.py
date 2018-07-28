@@ -106,6 +106,9 @@ CLEAN_DIR_WHITELIST = [
     'README.md',
 ]
 
+# amount above which we worry available space is running low
+TOTAL_SIZE_WORRY = 1400000000000  # ~= 1.4 TB
+
 # file to use as header for results
 HEADER_FN = 'header.md'
 
@@ -565,6 +568,15 @@ def generate_log(success: bool, results: List[DirResult]) -> str:
                 for e in res['errors']:
                     buffer.append(' - {}'.format(e))
                 buffer.append('')
+
+    # total size check
+    total_used = sum([r['size_raw'] for r in results])
+    if total_used >= TOTAL_SIZE_WORRY:
+        buffer.append('Total bytes used ({}) above worry limit ({})'.format(
+            humanfriendly.format_size(total_used),
+            humanfriendly.format_size(TOTAL_SIZE_WORRY),
+        ))
+        buffer.append('May need to look into expanding disk size soon!')
 
     return '\n'.join(buffer)
 

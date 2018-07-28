@@ -3,6 +3,36 @@
 This repository contains the infrastructure to provide a live status of
 `/projects/nlp-corpora/` by crawling its contents.
 
+## Features
+
+Checks over contents of all corpora (sub)directories.
+
+Per-corpus:
+
+- owner
+- group
+- permissions
+- configurable access restrictions (groups and permissions)
+- corpus structure adherence
+- readme existence
+- readme project description
+- readme documentation (of processed variants)
+- size
+
+Overall:
+
+- can fix permissions errors automatically with a flag
+- total size checks (above a configurable drive limit)
+- log containing detailed status breakdown and all errors
+- report generation
+    - copies readme into browsable index
+    - concise summary per corpus (name, readme link, description, size, access, status)
+- pie chart of overall size usage
+- configured cron usage:
+    - self-updates backend and runs daily
+    - pushes updated report to frontend
+    - emails full error log on failures (configurable verbosity)
+
 ## Installation
 
 ```bash
@@ -39,12 +69,6 @@ python check.py \
 ## Contributing
 
 Current feature worklist:
-
-- [ ] Overall usage
-
-    - [ ] Pie chart showing overall usage breakdown
-
-    - [ ] Fail overall check (+ email) if usage gets above threshold (e.g., 95%)
 
 - [ ] Check whether `_staging` and `nobackup` empty
 
