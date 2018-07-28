@@ -68,10 +68,8 @@ python check.py \
 
 ## Contributing
 
-Current feature worklist:
+Worklist:
 
-- [ ] Check whether `_staging` and `nobackup` empty
-
+- [ ] Get feedback
 - [ ] Migrate this to `uwnlp` github
-
 - [ ] Send announcement

@@ -93,10 +93,10 @@ RESTRICTED_PERMS: Permissions = {
 }
 
 # These are the things allowed to be in the top-level directory that aren't
-# checked.
+# checked for corpora, but should be empty.
 BLACKLIST = [
     'nobackup',
-    '_staging',  # TODO(mbforbes): Special check in here.
+    '_staging',
 ]
 
 # These are the only things allowed in a top-level (corpus) directory.
@@ -533,7 +533,7 @@ def plot(results: List[DirResult], plot_dest: str) -> None:
     plt.savefig(plot_dest)
 
 
-def generate_log(success: bool, results: List[DirResult]) -> str:
+def generate_log(base_dir: str, success: bool, results: List[DirResult]) -> str:
     """Takes results and generates log file for more detailed results."""
     # overall
     buffer = ['Overall pass: {}'.format(success), '']
@@ -577,6 +577,15 @@ def generate_log(success: bool, results: List[DirResult]) -> str:
             humanfriendly.format_size(TOTAL_SIZE_WORRY),
         ))
         buffer.append('May need to look into expanding disk size soon!')
+
+    # blacklisted dirs empty check
+    for b in BLACKLIST:
+        d = os.path.join(base_dir, b)
+        n_contents = len(os.listdir(d)) if os.path.isdir(d) else 0
+        if n_contents > 0:
+            buffer.append('Wanted directory "{}" to be empty, but contained {} files.'.format(
+                d, n_contents,
+            ))
 
     return '\n'.join(buffer)
 
@@ -676,7 +685,7 @@ def main() -> None:
 
     # write log. always write to log file, if provided. write to stderr only if
     # the overall results was not 100% successful.
-    log = generate_log(success, results)
+    log = generate_log(args.directory, success, results)
     if args.log_file is not None:
         with open(os.path.expanduser(args.log_file), 'w') as f:
             f.write(log)
