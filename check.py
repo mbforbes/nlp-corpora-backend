@@ -145,7 +145,7 @@ def get_size(path: str) -> int:
     """
     Returns size in bytes. Thanks to https://stackoverflow.com/a/25574638.
     """
-    return int(subprocess.check_output(['du','-s', path]).split()[0].decode('utf-8'))
+    return int(subprocess.check_output(['du','-bs', path]).split()[0].decode('utf-8'))
 
 
 def get_dirs(base_dir: str) -> List[str]:
@@ -522,6 +522,7 @@ def plot(results: List[DirResult], plot_dest: str) -> None:
     plt.setp(mypie, width=0.7, edgecolor='white')
 
     # Save
+    plt.tight_layout()
     plt.savefig(plot_dest)
 
 
