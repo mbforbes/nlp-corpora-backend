@@ -22,6 +22,8 @@ import sys
 from typing import Any, List, Optional, Set, Tuple, Dict
 
 # 3rd party
+import humanfriendly
+import matplotlib.pyplot as plt
 from mypy_extensions import TypedDict
 
 
@@ -33,7 +35,8 @@ class DirResult(TypedDict):
     """information we want from all results"""
     basename: str
     description: Optional[str]
-    size: str
+    size_raw: int
+    size_human: Optional[str]
     group_ok: bool
     group: Optional[str]
     owner_ok: bool
@@ -136,11 +139,11 @@ def build_top(success: bool) -> str:
     ])
 
 
-def get_size(path: str) -> str:
+def get_size(path: str) -> int:
     """
-    Thanks to https://stackoverflow.com/a/25574638
+    Returns size in bytes. Thanks to https://stackoverflow.com/a/25574638.
     """
-    return subprocess.check_output(['du','-sh', path]).split()[0].decode('utf-8')
+    return int(subprocess.check_output(['du','-s', path]).split()[0].decode('utf-8'))
 
 
 def get_dirs(base_dir: str) -> List[str]:
@@ -314,7 +317,8 @@ def check_dir(
     res: DirResult = {
         'basename': os.path.basename(path),
         'description': None,
-        'size': get_size(path),
+        'size_raw': 0,
+        'size_human': None,
         'group_ok': True,
         'group': None,
         'owner_ok': True,
@@ -326,6 +330,10 @@ def check_dir(
         'readme_proc_desc': False,
         'errors': [],
     }
+
+    size_bytes = get_size(path)
+    res['size_raw'] = size_bytes
+    res['size_human'] = humanfriendly.format_size(size_bytes)
 
     # edge case: if it's a file instead of a directory, everything else should
     # be marked as invalid and should just return now.
@@ -449,7 +457,7 @@ def generate_results_markdown(results: List[DirResult], std_grps: Set[str]) -> s
         rows.append(fmt.format(
             '[{}]({})'.format(res['basename'], os.path.join('doc/', res['basename'])),
             res['description'],
-            res['size'],
+            res['size_human'],
             fun_bool(True) if res['group'] in std_grps else '`{}`'.format(res['group']),
             fun_bool(compute_result_success(res)),
         ))
@@ -497,6 +505,24 @@ def build_doc_dir(results: List[DirResult], doc_dir: str) -> None:
                 ))
 
 
+def plot(results: List[DirResult], plot_dest: str) -> None:
+    """Writes donut plot of disk usages to plot_dest."""
+    group_names = ['{}\n({})'.format(r['basename'], r['size_human']) for r in results]
+    group_sizes = [r['size_raw'] for r in results]
+
+    # Create colors
+    #a, b, c=[plt.cm.Blues, plt.cm.Reds, plt.cm.Greens]
+
+    # Plot
+    fig, ax = plt.subplots()
+    ax.axis('equal')
+    mypie, _ = ax.pie(group_sizes, radius=1.3, labels=group_names, )#colors=[a(0.6), b(0.6), c(0.6)] )
+    plt.setp(mypie, width=0.7, edgecolor='white')
+
+    # Save
+    plt.savefig(plot_dest)
+
+
 def generate_log(success: bool, results: List[DirResult]) -> str:
     """Takes results and generates log file for more detailed results."""
     # overall
@@ -511,7 +537,7 @@ def generate_log(success: bool, results: List[DirResult]) -> str:
         buffer.append(fmt.format(
             res['basename'],
             res['description'],
-            res['size'],
+            res['size_human'],
             fun_bool(res['group_ok']),
             fun_bool(res['owner_ok']),
             fun_bool(res['perms_ok']),
@@ -592,6 +618,10 @@ def main() -> None:
         '--doc-dir',
         type=str,
         help='if provided, DESTROYS this dir if it exists, creates it fresh, and then writes directories and readmes for all corpora under it.')
+    parser.add_argument(
+        '--plot-dest',
+        type=str,
+        help='if provided, writes a donut plot of corpora disk space usage to this location.')
     args = parser.parse_args()
 
     # extract
@@ -620,6 +650,10 @@ def main() -> None:
     # maybe write doc dir
     if args.doc_dir is not None:
         build_doc_dir(results, os.path.expanduser(args.doc_dir))
+
+    # maybe write plot
+    if args.plot_dest is not None:
+        plot(results, os.path.expanduser(args.plot_dest))
 
     # write log. always write to log file, if provided. write to stderr only if
     # the overall results was not 100% successful.

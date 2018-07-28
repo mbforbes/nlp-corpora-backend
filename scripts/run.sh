@@ -25,7 +25,8 @@ python check.py \
     --directory /projects/nlp-corpora/ \
     --out-file ~/repos/nlp-corpora/README.md \
     --log-file ~/repos/nlp-corpora/BUILD.txt \
-    --doc-dir ~/repos/nlp-corpora/doc
+    --doc-dir ~/repos/nlp-corpora/doc \
+    --plot-dest ~/repos/nlp-corpora/disk-usage.svg
 pyenv deactivate
 
 # setp 3: push updated doc

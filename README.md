@@ -14,13 +14,18 @@ pip install -r requirements.txt
 ## Running
 
 ```bash
-# also prints log to stderr if any cheks failed. (This behavior so cron
+# also prints log to stderr if any checks failed. (This behavior so cron
 # auto sends an email to you if anything fails, but not if things pass.)
 python check.py \
     --directory /projects/nlp-corpora/ \
     --out-file ~/repos/nlp-corpora/README.md \
     --log-file ~/repos/nlp-corpora/BUILD.txt \
-    --doc-dir ~/repos/nlp-corpora/doc
+    --doc-dir ~/repos/nlp-corpora/doc \
+    --plot-dest ~/repos/nlp-corpora/disk-usage.svg
+
+# The script can attempt to fix permission errors it finds. This isn't normally
+# run in the cron job (though it could be). It can be enabled with a flag:
+python check.py --fix-perms
 
 # To run on the test directories (sorry Nelson, no automated tests yet), I run
 # this to ignore the output markdown and see only the log.
@@ -34,8 +39,6 @@ python check.py \
 ## Contributing
 
 Current feature worklist:
-
-- [ ] Clean up existing entries
 
 - [ ] Overall usage
 

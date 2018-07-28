@@ -1,6 +1,6 @@
 
 
-
+![plot of disk usage](disk-usage.svg)
 
 ## Documentation
 

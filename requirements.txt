@@ -1,2 +1,4 @@
 mypy
 mypy_extensions
+matplotlib
+humanfriendly
