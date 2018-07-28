@@ -9,29 +9,29 @@ Checks over contents of all corpora (sub)directories.
 
 Per-corpus:
 
-- owner
-- group
-- permissions
-- configurable access restrictions (groups and permissions)
-- corpus structure adherence
-- readme existence
-- readme project description
-- readme documentation (of processed variants)
-- size
+- [x] owner
+- [x] group
+- [x] permissions
+- [x] configurable access restrictions (groups and permissions)
+- [x] corpus structure adherence
+- [x] readme existence
+- [x] readme project description
+- [x] readme documentation (of processed variants)
+- [x] size
 
 Overall:
 
-- can fix permissions errors automatically with a flag
-- total size checks (above a configurable drive limit)
-- log containing detailed status breakdown and all errors
-- report generation
-    - copies readme into browsable index
-    - concise summary per corpus (name, readme link, description, size, access, status)
-- pie chart of overall size usage
-- configured cron usage:
-    - self-updates backend and runs daily
-    - pushes updated report to frontend
-    - emails full error log on failures (configurable verbosity)
+- [x] can fix permissions errors automatically with a flag
+- [x] total size checks (above a configurable drive limit)
+- [x] log containing detailed status breakdown and all errors
+- [x] report generation
+    - [x] copies readme into browsable index
+    - [x] concise summary per corpus (name, readme link, description, size, access, status)
+    - [x] pie chart of overall size usage
+- [x] configured cron usage:
+    - [x] self-updates backend and runs daily
+    - [x] pushes updated report to frontend
+    - [x] emails full error log on failures (configurable verbosity)
 
 ## Installation
 
@@ -42,6 +42,8 @@ pip install -r requirements.txt
 ```
 
 ## Running
+
+Example usage:
 
 ```bash
 # also prints log to stderr if any checks failed. (This behavior so cron
@@ -64,6 +66,45 @@ python check.py \
     --ok-owners max \
     --group-config test/test-groups.json \
     --out-file /dev/null
+```
+
+Full options:
+
+```
+python check.py --help
+usage: check.py [-h] [--directory DIRECTORY] [--ok-owners OK_OWNERS]
+                [--group-config GROUP_CONFIG] [--fix-perms] [--verbose]
+                [--out-file OUT_FILE] [--log-file LOG_FILE]
+                [--doc-dir DOC_DIR] [--plot-dest PLOT_DEST]
+
+Tool to check nlp-corpora directory and output documentation.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --directory DIRECTORY
+                        path to top-level corpus directory (default:
+                        /projects/nlp-corpora/)
+  --ok-owners OK_OWNERS
+                        comma-separated list of allowed owners (default:
+                        mbforbes)
+  --group-config GROUP_CONFIG
+                        json file containing group information (default:
+                        groups.json)
+  --fix-perms           whether this should attempt to fix permission errors
+                        it finds (default: False)
+  --verbose             whether to log error messages for every problematic
+                        file (default: False)
+  --out-file OUT_FILE   path to write output file. If not provided, writes to
+                        stdout. (default: None)
+  --log-file LOG_FILE   if provided, writes log to this path. If not 100% of
+                        checks pass, always writes log to stderr. (default:
+                        None)
+  --doc-dir DOC_DIR     if provided, DESTROYS this dir if it exists, creates
+                        it fresh, and then writes directories and readmes for
+                        all corpora under it. (default: None)
+  --plot-dest PLOT_DEST
+                        if provided, writes a donut plot of corpora disk space
+                        usage to this location. (default: None)
 ```
 
 ## Contributing
