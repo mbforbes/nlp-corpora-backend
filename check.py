@@ -509,8 +509,13 @@ def build_doc_dir(results: List[DirResult], doc_dir: str) -> None:
 
 def plot(results: List[DirResult], plot_dest: str) -> None:
     """Writes donut plot of disk usages to plot_dest."""
-    group_names = ['{}\n({})'.format(r['basename'], r['size_human']) for r in results]
-    group_sizes = [r['size_raw'] for r in results]
+    total_size = sum([r['size_raw'] for r in results])
+    group_sizes = [r['size_raw']/total_size for r in results]
+    group_names = [
+        '{}\n({})'.format(r['basename'], r['size_human'])
+        if r['size_raw']/total_size > .1 else ''
+        for r in results
+    ]
 
     # Create colors
     #a, b, c=[plt.cm.Blues, plt.cm.Reds, plt.cm.Greens]
@@ -518,11 +523,10 @@ def plot(results: List[DirResult], plot_dest: str) -> None:
     # Plot
     fig, ax = plt.subplots()
     ax.axis('equal')
-    mypie, _ = ax.pie(group_sizes, radius=1.3, labels=group_names, )#colors=[a(0.6), b(0.6), c(0.6)] )
+    mypie, _ = ax.pie(group_sizes, radius=0.8, labels=group_names, )#colors=[a(0.6), b(0.6), c(0.6)] )
     plt.setp(mypie, width=0.7, edgecolor='white')
 
     # Save
-    plt.tight_layout()
     plt.savefig(plot_dest)
 
 
