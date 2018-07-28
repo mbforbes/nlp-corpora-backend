@@ -23,6 +23,8 @@ from typing import Any, List, Optional, Set, Tuple, Dict
 
 # 3rd party
 import humanfriendly
+import matplotlib
+matplotlib.use('Agg')  # set backed to avoid crash on non X-window server
 import matplotlib.pyplot as plt
 from mypy_extensions import TypedDict
 
