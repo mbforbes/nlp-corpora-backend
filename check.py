@@ -513,7 +513,7 @@ def plot(results: List[DirResult], plot_dest: str) -> None:
     group_sizes = [r['size_raw']/total_size for r in results]
     group_names = [
         '{}\n({})'.format(r['basename'], r['size_human'])
-        if r['size_raw']/total_size > .1 else ''
+        if r['size_raw']/total_size > .03 else ''
         for r in results
     ]
 
