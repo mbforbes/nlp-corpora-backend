@@ -106,11 +106,3 @@ optional arguments:
                         if provided, writes a donut plot of corpora disk space
                         usage to this location. (default: None)
 ```
-
-## Contributing
-
-Worklist:
-
-- [ ] Get feedback
-- [ ] Migrate this to `uwnlp` github
-- [ ] Send announcement
