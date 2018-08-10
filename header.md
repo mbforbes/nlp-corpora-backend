@@ -1,8 +1,25 @@
-UW NLP maintains a repository of corpora for internal UW use on the UW CSE
-department fileserver at `/projects/nlp-corpora/`.
+**_A community-built high-quality repository of NLP corpora_**
 
-This document provides a live, browsable index of all of the corpora. Below
-that are instructions for accessing the corpora and proposing new additions.
+This project aims to collect a shared repository of corpora useful for NLP
+researchers, available inside UW.
+
+- **Community-built** — New corpora are encouraged! Official benchmark tasks,
+  large-scale recipe scrapes, collections of old novels—all are welcome.
+
+- **High-quality** — Each corpus undergoes a vetting process to ensure it is of
+  a marked version and has known state, consistent structure, and ample
+  documentation. Once it is added, a corpus becomes read-only to guard against
+  accidental modifications. A daily crawler indexes the full collection and
+  performs several checks on every file of every corpus (browsable
+  [below](#live-status)).
+
+- **UW accessible** — All corpora live on the UW CSE department fileserver at
+  `/projects/nlp-corpora/` where they enjoy automatic backups. Friends in EE,
+  Linguistics, or other departments can [easily receive free
+  access](#access-outside-uw-cse).
+
+See below for a live, browsable index of all of the corpora, as well
+as instructions for accessing the corpora and proposing new additions.
 
 ## Live Status
 

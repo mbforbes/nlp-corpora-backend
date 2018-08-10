@@ -494,7 +494,7 @@ def generate_access_markdown(restricted_grps: Dict[str, RestrictedGroup]) -> str
     rows = []
     for name, grpinfo in restricted_grps.items():
         rows.append(fmt.format(
-            name,
+            '`{}`'.format(name),
             grpinfo['desc'],
         ))
     return '\n'.join([header, sep] + rows)
