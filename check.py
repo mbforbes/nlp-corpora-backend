@@ -14,6 +14,7 @@ import glob
 import grp
 import json
 import os
+import platform
 import pwd
 import shutil
 import stat
@@ -94,9 +95,14 @@ RESTRICTED_PERMS: Permissions = {
 
 # These are the things allowed to be in the top-level directory that aren't
 # checked for corpora, but should be empty.
-BLACKLIST = [
+WHITELIST_DIRS = [
     'nobackup',
     '_staging',
+]
+
+# These are files we're ok with existing in the root of the repository.
+WHITELIST_FILES = [
+    'README.md',
 ]
 
 # These are the only things allowed in a top-level (corpus) directory.
@@ -146,17 +152,27 @@ def build_top(success: bool) -> str:
 
 def get_size(path: str) -> int:
     """
-    Returns size in bytes. Thanks to https://stackoverflow.com/a/25574638.
+    Returns size in bytes.
     """
-    return int(subprocess.check_output(['du','-bs', path]).split()[0].decode('utf-8'))
+    # Thanks to https://stackoverflow.com/a/25574638. Additional note: we
+    # switch based on platform because BSD doesn't support the -b option.
+    # (Better implementation would be to do in python.)
+    plat = platform.system()
+    if plat == 'Linux':
+        return int(subprocess.check_output(['du','-bs', path]).split()[0].decode('utf-8'))
+    elif plat == 'Darwin':
+        return 512 * int(subprocess.check_output(['du','-s', path]).split()[0].decode('utf-8'))
+    else:
+        raise ValueError('Unimplemented platform: "{}"'.format(plat))
 
 
 def get_dirs(base_dir: str) -> List[str]:
+    whitelist = WHITELIST_DIRS + WHITELIST_FILES
     # get all subdirectories
     globs = glob.glob(os.path.join(base_dir, '*'))
     paths = []
     for path in globs:
-        if os.path.basename(path) not in BLACKLIST:
+        if os.path.basename(path) not in whitelist:
             paths.append(path)
     return sorted(paths)
 
@@ -578,8 +594,8 @@ def generate_log(base_dir: str, success: bool, results: List[DirResult]) -> str:
         ))
         buffer.append('May need to look into expanding disk size soon!')
 
-    # blacklisted dirs empty check
-    for b in BLACKLIST:
+    # whitelist dirs empty check
+    for b in WHITELIST_DIRS:
         d = os.path.join(base_dir, b)
         n_contents = len(os.listdir(d)) if os.path.isdir(d) else 0
         if n_contents > 0:

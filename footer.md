@@ -11,11 +11,12 @@ the machines `{recycle,bicycle,tricycle}@cs.washington.edu`) so that they can
 view the department filesystem. The nlp-corpora directory is located on the
 department filesystem at `/projects/nlp-corpora/`. Anyone with a UW CSE account
 can log onto the department servers and view the files there. (For those
-without a UW CSE account, see the section below.)
+without a UW CSE account, see the [restricted access
+section](#restricted-access).)
 
-The corpora are meant to be read-only so that they stay in a known, clean
-state. To work with files from the corpora, please copy them to a local
-directory, e.g., with `scp`.
+The corpora are read-only (this is enforced by our crawler) so that they stay
+in a known, clean state. To work with files from the corpora, please copy them
+to a local directory, e.g., with `scp`.
 
 ### Corpus structure
 
