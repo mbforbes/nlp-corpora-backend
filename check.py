@@ -115,10 +115,10 @@ CLEAN_DIR_WHITELIST = [
 # amount above which we worry available space is running low
 TOTAL_SIZE_WORRY = 1400000000000  # ~= 1.4 TB
 
-# file to use as header for results
+# files containing pre-written fixed markdown content we copy into the output
+# readme.
 HEADER_FN = 'header.md'
-
-# file to use as footer for results
+MID_FN = 'mid.md'
 FOOTER_FN = 'footer.md'
 
 BADGE_RESULT_FMT = '![](https://img.shields.io/badge/docs-{success}-{color}.svg?longCache=true&style=flat)'
@@ -466,12 +466,13 @@ def check_dir(
 
 
 def fun_bool(boring: bool) -> str:
-    return '✔' if boring else '✗'
+    return '✓' if boring else '✗'
 
 
 def generate_results_markdown(results: List[DirResult], std_grps: Set[str]) -> str:
+    """Generates table for README.md giving corpora status overview."""
     fmt = '{} | {} | {} | {} | {}'
-    header = fmt.format('Corpus', 'Description', 'Size', 'Access', 'Status')
+    header = fmt.format('Corpus', 'Description', 'Size', '[Access](#restricted-access)', 'Status')
     separator = fmt.format(*(['---']*5))
     rows = []
     for res in results:
@@ -479,10 +480,24 @@ def generate_results_markdown(results: List[DirResult], std_grps: Set[str]) -> s
             '[{}]({})'.format(res['basename'], os.path.join('doc/', res['basename'])),
             res['description'],
             res['size_human'],
-            fun_bool(True) if res['group'] in std_grps else '`{}`'.format(res['group']),
+            fun_bool(True) if res['group'] in std_grps else '[`{}`](#restricted-access)'.format(res['group']),
             fun_bool(compute_result_success(res)),
         ))
     return '\n'.join([header, separator] + rows)
+
+
+def generate_access_markdown(restricted_grps: Dict[str, RestrictedGroup]) -> str:
+    """Generates table for README.md describing how to access restricted corpora."""
+    fmt = '{} | {}'
+    header = fmt.format('Access', 'How to be added')
+    sep = fmt.format(*(['---']*2))
+    rows = []
+    for name, grpinfo in restricted_grps.items():
+        rows.append(fmt.format(
+            name,
+            grpinfo['desc'],
+        ))
+    return '\n'.join([header, sep] + rows)
 
 
 def compute_result_success(r: DirResult) -> bool:
@@ -681,6 +696,8 @@ def main() -> None:
         build_top(success),
         read(HEADER_FN),
         generate_results_markdown(results, std_grps),
+        read(MID_FN),
+        generate_access_markdown(restricted_grps),
         read(FOOTER_FN),
     ])
 
