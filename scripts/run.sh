@@ -33,5 +33,5 @@ pyenv deactivate
 cd ~/repos/nlp-corpora/
 git add .
 git commit -m "update `date '+%m/%d/%Y %H:%M:%S'`" 1>> ~/.cronlog 2>&1
-git pull --regbase origin master 1>> ~/.cronlog 2>&1
+git pull --rebase origin master 1>> ~/.cronlog 2>&1
 git push origin master 1>> ~/.cronlog 2>&1
