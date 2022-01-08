@@ -650,7 +650,7 @@ def main() -> None:
     parser.add_argument(
         '--ok-owners',
         type=str,
-        default='mbforbes',
+        default='sg01',
         help='comma-separated list of allowed owners')
     parser.add_argument(
         '--group-config',
